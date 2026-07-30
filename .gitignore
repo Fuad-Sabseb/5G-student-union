@@ -1,0 +1,29 @@
+# Environment variables (CRITICAL: keeps passwords & keys off GitHub)
+.env
+.env.local
+.env.production
+
+backend/.env
+backend/.env.example
+
+# Dependency folders
+node_modules/
+
+# Build and output directories
+dist/
+build/
+
+# Local uploaded files (prevents temp dev uploads from cluttering Git)
+backend/uploads/
+uploads/
+
+# Operating system files & IDE settings
+.DS_Store
+.vscode/
+.idea/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
