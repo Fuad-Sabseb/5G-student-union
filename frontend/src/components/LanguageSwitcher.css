@@ -1,0 +1,30 @@
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.lang-switch__btn {
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 0.25rem 0.35rem;
+  border-radius: 4px;
+}
+
+.lang-switch__btn.is-active {
+  opacity: 1;
+  color: var(--color-star-gold);
+}
+
+.lang-switch__btn:hover {
+  opacity: 1;
+}
+
+.lang-switch__divider {
+  opacity: 0.4;
+}

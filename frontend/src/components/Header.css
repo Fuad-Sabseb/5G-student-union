@@ -1,0 +1,126 @@
+.site-header {
+  background: var(--color-gibe-dusk);
+  color: var(--color-white);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 3px solid var(--color-star-gold);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.site-header__logo {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-star-gold);
+}
+
+.site-header__brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.site-header__brand-text strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+}
+
+.site-header__brand-text small {
+  font-size: 0.7rem;
+  opacity: 0.75;
+}
+
+.site-header__toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+.site-header__toggle span {
+  width: 24px;
+  height: 2px;
+  background: var(--color-white);
+  display: block;
+}
+
+.site-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.site-header__link {
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.85;
+  padding: 0.4rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.site-header__link:hover,
+.site-header__link.is-active {
+  opacity: 1;
+  border-bottom-color: var(--color-star-gold);
+}
+
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: 0.5rem;
+  padding-left: 1rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.site-header__actions .btn {
+  padding: 0.5em 1.1em;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 900px) {
+  .site-header__toggle {
+    display: flex;
+  }
+
+  .site-header__nav {
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    padding: 1rem 0 1.5rem;
+    gap: 0.75rem;
+  }
+
+  .site-header__nav.is-open {
+    display: flex;
+  }
+
+  .site-header__actions {
+    border-left: none;
+    padding-left: 0;
+    margin-left: 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    width: 100%;
+  }
+}

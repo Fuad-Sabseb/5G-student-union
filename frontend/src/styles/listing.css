@@ -1,0 +1,159 @@
+/* Shared by News/Events, Gallery, and Blog listing + detail pages */
+
+.news-tabs {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.news-tab {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-white);
+  padding: 0.5em 1.2em;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.news-tab.is-active {
+  background: var(--color-star-gold);
+  color: var(--color-gibe-dusk);
+  border-color: var(--color-star-gold);
+}
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.news-card { display: block; }
+
+.news-card__image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+}
+
+.news-card__type {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2em 0.6em;
+  border-radius: 4px;
+  margin-bottom: 0.6rem;
+  background: var(--color-cream-deep);
+  color: var(--color-gibe-dusk);
+}
+.news-card__type--event {
+  background: var(--color-star-gold-soft);
+  color: var(--color-gibe-dusk);
+}
+
+.news-card h3 { font-size: 1.1rem; margin-bottom: 0.4rem; }
+
+.news-card__date {
+  font-size: 0.85rem;
+  color: var(--color-canopy);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.news-card__excerpt {
+  color: var(--color-ink-soft);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+.back-link:hover { opacity: 1; }
+
+.news-detail { max-width: 760px; }
+.news-detail__image {
+  width: 100%;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+}
+.news-detail__content {
+  font-size: 1.05rem;
+  white-space: pre-wrap;
+}
+
+.news-comments {
+  margin-top: 2.5rem;
+  border-top: 1px solid var(--color-border);
+  padding-top: 2rem;
+}
+.comment {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.comment strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--color-gibe-dusk);
+}
+.comment p { margin: 0.25rem 0 0; color: var(--color-ink-soft); }
+
+.comment-form {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+}
+.comment-form textarea {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem;
+  font-family: inherit;
+}
+
+/* ---------- Status badges (support requests, membership status) ---------- */
+.status-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.25em 0.7em;
+  border-radius: 999px;
+  background: var(--color-cream-deep);
+  color: var(--color-ink-soft);
+}
+.status-badge--open,
+.status-badge--pending { background: var(--color-star-gold-soft); color: var(--color-gibe-dusk); }
+.status-badge--in-progress { background: #dbe7ff; color: #1c3f8f; }
+.status-badge--resolved,
+.status-badge--active { background: #d9f0e1; color: var(--color-canopy); }
+.status-badge--closed,
+.status-badge--inactive { background: var(--color-cream-deep); color: var(--color-ink-soft); }
+
+.request-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+.request-item {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1rem;
+}
+.request-item__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+}
+.request-item p { margin: 0; color: var(--color-ink-soft); font-size: 0.9rem; }

@@ -1,0 +1,12 @@
+.blog-hero {
+  padding-bottom: 1.5rem;
+}
+
+.blog-hero__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
