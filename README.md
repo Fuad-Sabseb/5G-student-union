@@ -1,3 +1,4 @@
+<img width="1352" height="729" alt="Screenshot 2026-07-30 at 9 01 43 at night" src="https://github.com/user-attachments/assets/66f17bdb-6afc-40bd-aaa5-9a3f6206de01" />
 # Gamtaa Barattoota Shanan Gibee (Shanan Gibe Student Union) — Website
 
 Full-stack MERN website for the Shanan Gibe Student Union at Jimma University.
