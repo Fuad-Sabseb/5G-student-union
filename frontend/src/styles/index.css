@@ -1,0 +1,203 @@
+/* ============================================
+   GBSG Design Tokens
+   Palette drawn from the union's own emblem:
+   the dusk-blue sky, five gold stars, and the
+   green highland canopy around Jimma.
+   ============================================ */
+:root {
+  /* Color */
+  --color-gibe-dusk: #16324f;       /* primary — deep indigo-blue, from the emblem sky */
+  --color-gibe-dusk-light: #24476d;
+  --color-star-gold: #d9a441;       /* signature accent — the five stars */
+  --color-star-gold-soft: #f0d9a8;
+  --color-canopy: #2e4f3b;          /* secondary green — coffee-forest canopy */
+  --color-canopy-light: #3f6a50;
+  --color-cream: #f3eee1;           /* warm content background */
+  --color-cream-deep: #e8e0cc;
+  --color-ink: #211e1a;             /* body text */
+  --color-ink-soft: #514c43;
+  --color-white: #ffffff;
+  --color-border: rgba(33, 30, 26, 0.12);
+
+  /* Type */
+  --font-display: 'Bricolage Grotesque', 'Segoe UI', sans-serif;
+  --font-body: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+  --font-quote: 'Newsreader', Georgia, serif;
+
+  /* Scale */
+  --step-sm: 0.875rem;
+  --step-base: 1rem;
+  --step-md: 1.25rem;
+  --step-lg: 1.75rem;
+  --step-xl: 2.5rem;
+  --step-2xl: 3.5rem;
+
+  /* Layout */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --content-max: 1180px;
+  --space-section: clamp(3rem, 6vw, 6rem);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background: var(--color-cream);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  margin: 0 0 0.5em;
+  line-height: 1.1;
+  color: var(--color-gibe-dusk);
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: var(--step-2xl); font-weight: 700; }
+h2 { font-size: var(--step-xl); font-weight: 700; }
+h3 { font-size: var(--step-lg); font-weight: 600; }
+
+p { margin: 0 0 1em; }
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img { max-width: 100%; display: block; }
+
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible keyboard focus */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--color-star-gold);
+  outline-offset: 2px;
+}
+
+/* ============ Shared layout utilities ============ */
+.container {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.section {
+  padding: var(--space-section) 0;
+}
+
+.section--dusk {
+  background: var(--color-gibe-dusk);
+  color: var(--color-white);
+}
+.section--dusk h1, .section--dusk h2, .section--dusk h3 {
+  color: var(--color-white);
+}
+
+.section--canopy {
+  background: var(--color-canopy);
+  color: var(--color-white);
+}
+.section--canopy h2, .section--canopy h3 {
+  color: var(--color-white);
+}
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--step-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-star-gold);
+  margin-bottom: 0.75rem;
+  display: inline-block;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.75em 1.5em;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+
+.btn--gold {
+  background: var(--color-star-gold);
+  color: var(--color-gibe-dusk);
+}
+.btn--gold:hover { background: #e6b75c; }
+
+.btn--outline {
+  background: transparent;
+  border-color: currentColor;
+  color: inherit;
+}
+.btn--outline:hover { background: rgba(255,255,255,0.1); }
+
+.btn--dusk {
+  background: var(--color-gibe-dusk);
+  color: var(--color-white);
+}
+.btn--dusk:hover { background: var(--color-gibe-dusk-light); }
+
+.card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.75rem;
+}
+
+.quote {
+  font-family: var(--font-quote);
+  font-style: italic;
+  font-size: var(--step-md);
+  color: var(--color-gibe-dusk);
+}
+
+/* ============ Five-star signature motif ============ */
+/* "Shanan" means "five" — the union's name is literally a count.
+   This motif recurs as a section divider instead of generic numbering. */
+.star-divider {
+  display: flex;
+  gap: 0.4em;
+  justify-content: center;
+  margin: 1.5rem 0;
+  color: var(--color-star-gold);
+  font-size: 1.1rem;
+}
+
+.star-divider--left {
+  justify-content: flex-start;
+}
