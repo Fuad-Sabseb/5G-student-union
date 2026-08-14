@@ -36,18 +36,75 @@ const createAnnouncement = asyncHandler(async (req, res) => {
   res.status(201).json(announcement);
 });
 
-// @desc    Get all announcements (optionally filter by type)
-// @route   GET /api/announcements?type=news|event
+function escapeRegex(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
+// @desc    Get all announcements (optionally filter by type and search)
+// @route   GET /api/announcements?type=news|event&search=&page=&limit=
 // @access  Public
 const getAnnouncements = asyncHandler(async (req, res) => {
   const filter = {};
   if (req.query.type) filter.type = req.query.type;
 
+  if (req.query.search && req.query.search.trim()) {
+    const sanitized = escapeRegex(req.query.search.trim());
+    filter.$or = [
+      { title_en: { $regex: sanitized, $options: 'i' } },
+      { title_or: { $regex: sanitized, $options: 'i' } },
+      { content_en: { $regex: sanitized, $options: 'i' } },
+      { content_or: { $regex: sanitized, $options: 'i' } },
+    ];
+  }
+
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 20;
+  const skip = (page - 1) * limit;
+
+  const totalCount = await Announcement.countDocuments(filter);
   const announcements = await Announcement.find(filter)
     .populate('author', 'fullName leadershipPosition')
-    .sort({ publishedAt: -1 });
+    .sort({ publishedAt: -1 })
+    .skip(skip)
+    .limit(limit);
 
   res.json(announcements);
+});
+
+// @desc    Toggle RSVP for an event
+// @route   POST /api/announcements/:id/rsvp
+// @access  Private
+const toggleRsvp = asyncHandler(async (req, res) => {
+  const announcement = await Announcement.findById(req.params.id);
+  if (!announcement) {
+    res.status(404);
+    throw new Error('Announcement not found');
+  }
+
+  if (announcement.type !== 'event') {
+    res.status(400);
+    throw new Error('RSVP is only available for events');
+  }
+
+  const existingIndex = announcement.rsvps.findIndex(
+    (r) => r.user.toString() === req.member._id.toString()
+  );
+
+  let isAttending = false;
+  if (existingIndex > -1) {
+    announcement.rsvps.splice(existingIndex, 1);
+    isAttending = false;
+  } else {
+    announcement.rsvps.push({ user: req.member._id, createdAt: new Date() });
+    isAttending = true;
+  }
+
+  await announcement.save();
+  res.json({
+    isAttending,
+    count: announcement.rsvps.length,
+    rsvps: announcement.rsvps,
+  });
 });
 
 // @desc    Get a single announcement (with comments)
@@ -175,4 +232,5 @@ module.exports = {
   deleteAnnouncement,
   addComment,
   deleteComment,
+  toggleRsvp,
 };

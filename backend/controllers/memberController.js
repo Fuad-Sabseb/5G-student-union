@@ -1,25 +1,39 @@
 const asyncHandler = require('express-async-handler');
 const Member = require('../models/Member');
 
-// @desc    Get all members (with optional filters: status, role, campus, search)
-// @route   GET /api/members
+function escapeRegex(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
+// @desc    Get all members (with optional filters: status, role, campus, search, pagination)
+// @route   GET /api/members?status=&role=&campus=&search=&page=&limit=
 // @access  Private/Admin
 const getMembers = asyncHandler(async (req, res) => {
-  const { status, role, campus, search } = req.query;
+  const { status, role, campus, search, page = 1, limit = 50 } = req.query;
   const filter = {};
 
   if (status) filter.membershipStatus = status;
   if (role) filter.role = role;
   if (campus) filter.campus = campus;
-  if (search) {
+  if (search && search.trim()) {
+    const sanitized = escapeRegex(search.trim());
     filter.$or = [
-      { fullName: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } },
-      { studentId: { $regex: search, $options: 'i' } },
+      { fullName: { $regex: sanitized, $options: 'i' } },
+      { email: { $regex: sanitized, $options: 'i' } },
+      { studentId: { $regex: sanitized, $options: 'i' } },
     ];
   }
 
-  const members = await Member.find(filter).sort({ createdAt: -1 });
+  const pageNum = parseInt(page, 10) || 1;
+  const limitNum = parseInt(limit, 10) || 50;
+  const skip = (pageNum - 1) * limitNum;
+
+  const totalCount = await Member.countDocuments(filter);
+  const members = await Member.find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limitNum);
+
   res.json(members);
 });
 

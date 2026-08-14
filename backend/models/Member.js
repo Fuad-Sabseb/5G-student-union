@@ -17,9 +17,20 @@ const memberSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
       minlength: 6,
       select: false, // never return password by default
+      validate: {
+        validator: function (v) {
+          // Password required if not signing in via Google
+          return this.googleId || (v && v.length >= 6);
+        },
+        message: 'Password is required and must be at least 6 characters',
+      },
+    },
+    googleId: {
+      type: String,
+      trim: true,
+      default: null,
     },
     phone: {
       type: String,
@@ -79,13 +90,23 @@ const memberSchema = new mongoose.Schema(
       enum: ['en', 'or'],
       default: 'or',
     },
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+    resetPasswordExpire: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
 
+memberSchema.index({ role: 1, membershipStatus: 1 });
+
 // Hash password before saving
 memberSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password') || !this.password) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();

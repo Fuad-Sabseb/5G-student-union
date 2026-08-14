@@ -27,16 +27,35 @@ const createBlogPost = asyncHandler(async (req, res) => {
   res.status(201).json(post);
 });
 
-// @desc    Get published blog posts (optionally filter by language)
-// @route   GET /api/blog?language=en|or
+function escapeRegex(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
+// @desc    Get published blog posts (optionally filter by language, search, pagination)
+// @route   GET /api/blog?language=en|or&search=&page=&limit=
 // @access  Public
 const getBlogPosts = asyncHandler(async (req, res) => {
   const filter = { published: true };
   if (req.query.language) filter.language = req.query.language;
 
+  if (req.query.search && req.query.search.trim()) {
+    const sanitized = escapeRegex(req.query.search.trim());
+    filter.$or = [
+      { title: { $regex: sanitized, $options: 'i' } },
+      { content: { $regex: sanitized, $options: 'i' } },
+    ];
+  }
+
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 20;
+  const skip = (page - 1) * limit;
+
+  const totalCount = await BlogPost.countDocuments(filter);
   const posts = await BlogPost.find(filter)
     .populate('author', 'fullName profileImageUrl department')
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
 
   res.json(posts);
 });

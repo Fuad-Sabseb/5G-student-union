@@ -128,15 +128,20 @@ export default function Support() {
                 ) : (
                   <ul className="request-list">
                     {myRequests.map((r) => (
-                      <li key={r._id} className="request-item">
-                        <div className="request-item__row">
-                          <strong>{r.subject}</strong>
-                          <span className={`status-badge status-badge--${r.status}`}>
-                            {t(`support_page.status_${r.status.replace('-', '_')}`)}
-                          </span>
-                        </div>
-                        <p>{r.description}</p>
-                      </li>
+                      <NavLink to={`/support/${r._id}`} key={r._id} className="request-item-link">
+                        <li className="request-item">
+                          <div className="request-item__row">
+                            <strong>{r.subject}</strong>
+                            <span className={`status-badge status-badge--${r.status}`}>
+                              {t(`support_page.status_${r.status.replace('-', '_')}`)}
+                            </span>
+                          </div>
+                          <p>{r.description}</p>
+                          <small style={{ color: 'var(--color-star-gold)', fontWeight: 600 }}>
+                            {t('support_page.view_thread') || 'View Thread & Responses →'}
+                          </small>
+                        </li>
+                      </NavLink>
                     ))}
                   </ul>
                 )}
