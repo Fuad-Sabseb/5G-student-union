@@ -16,7 +16,70 @@ Tone & Style:
 - Maintain an encouraging and respectful academic tone.
 `;
 
-// In-memory fallback responses when API key is missing
+// In-memory model cache to avoid calling listModels on every single user prompt
+let cachedActiveModels = null;
+let lastModelFetchTime = 0;
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+
+/**
+ * Dynamically discover available active models for this specific API key from Google API
+ */
+async function discoverAvailableModels(apiKey) {
+  const now = Date.now();
+  if (cachedActiveModels && now - lastModelFetchTime < CACHE_TTL) {
+    return cachedActiveModels;
+  }
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    if (res.ok) {
+      const data = await res.json();
+      const available = (data.models || [])
+        .filter((m) => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+        .map((m) => m.name.replace(/^models\//, ''));
+
+      if (available.length > 0) {
+        console.log(`[AI Assistant] Discovered ${available.length} active models from Google API:`, available);
+
+        // Sort: flash first, then pro, then others
+        available.sort((a, b) => {
+          const aFlash = a.includes('flash');
+          const bFlash = b.includes('flash');
+          if (aFlash && !bFlash) return -1;
+          if (!aFlash && bFlash) return 1;
+          return 0;
+        });
+
+        cachedActiveModels = available;
+        lastModelFetchTime = now;
+        return available;
+      }
+    } else {
+      const errText = await res.text();
+      console.warn(`[AI Assistant] ListModels HTTP ${res.status}:`, errText);
+    }
+  } catch (e) {
+    console.warn(`[AI Assistant] Could not query ListModels (${e.message}). Using candidate list.`);
+  }
+
+  // Fallback candidate list covering latest 2026/2025/2024 model releases
+  return [
+    'gemini-2.5-flash',
+    'gemini-2.5-pro',
+    'gemini-2.0-flash-001',
+    'gemini-2.0-flash-lite',
+    'gemini-2.0-flash-lite-preview-02-05',
+    'gemini-flash-latest',
+    'gemini-pro-latest',
+    'gemini-1.5-flash-latest',
+    'gemini-1.5-pro-latest',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
+  ];
+}
+
+// In-memory fallback responses when API key is missing or offline
 const getFallbackResponse = (message, lang) => {
   const lower = (message || '').toLowerCase();
 
@@ -74,34 +137,26 @@ const handleAIChat = asyncHandler(async (req, res) => {
   const apiKey = rawKey.trim().replace(/^"|"$/g, '');
 
   if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
-    console.warn('[AI Assistant] GEMINI_API_KEY is not configured in environment variables.');
+    console.warn('[AI Assistant] GEMINI_API_KEY is not configured.');
     const reply = getFallbackResponse(message, language);
     return res.json({
       reply,
       isFallback: true,
-      note: 'Using offline fallback. Please set GEMINI_API_KEY in your hosting dashboard (Render) environment variables for real-time generative responses.',
+      note: 'Please configure GEMINI_API_KEY in your hosting dashboard (Render) environment variables.',
     });
   }
 
-  // Official public Gemini model IDs
-  const modelCandidates = [
-    'gemini-2.0-flash',
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-8b',
-    'gemini-1.5-pro',
-    'gemini-pro',
-  ];
-
+  // 1. Discover or get active models from Google API
+  const modelCandidates = await discoverAvailableModels(apiKey);
   const genAI = new GoogleGenerativeAI(apiKey);
   let lastError = null;
 
-  // Format valid chat history
+  // Format valid chat history with alternating roles
   const formattedHistory = [];
   let lastRole = null;
   for (const item of history || []) {
     if (item && item.text && item.text.trim()) {
       const role = item.sender === 'user' ? 'user' : 'model';
-      // Ensure history strictly alternates roles as required by Gemini API
       if (role !== lastRole) {
         formattedHistory.push({
           role,
@@ -112,64 +167,93 @@ const handleAIChat = asyncHandler(async (req, res) => {
     }
   }
 
-  // Ensure history does not end on a 'user' turn before we send a new user message
+  // Remove trailing user message from history if any
   if (formattedHistory.length > 0 && formattedHistory[formattedHistory.length - 1].role === 'user') {
     formattedHistory.pop();
   }
 
+  // 2. Iterate through discovered model candidates
   for (const modelName of modelCandidates) {
+    // Strategy A: Native SDK with startChat
     try {
-      const modelOptions = {
+      const model = genAI.getGenerativeModel({
         model: modelName,
+        systemInstruction: SYSTEM_INSTRUCTION,
+      });
+
+      const chat = model.startChat({
+        history: formattedHistory,
+        generationConfig: {
+          maxOutputTokens: 1000,
+          temperature: 0.7,
+        },
+      });
+
+      const result = await chat.sendMessage(message);
+      const responseText = result.response.text();
+
+      console.log(`[AI Assistant] Responded successfully via SDK using model: ${modelName}`);
+      return res.json({
+        reply: responseText,
+        isFallback: false,
+        modelUsed: modelName,
+      });
+    } catch (sdkErr) {
+      console.warn(`[AI Assistant] SDK model ${modelName} failed (${sdkErr.message}). Trying Direct REST...`);
+      lastError = sdkErr;
+    }
+
+    // Strategy B: Direct REST generateContent API
+    try {
+      const restPayload = {
+        system_instruction: {
+          parts: [{ text: SYSTEM_INSTRUCTION }],
+        },
+        contents: [
+          ...formattedHistory,
+          {
+            role: 'user',
+            parts: [{ text: message }],
+          },
+        ],
+        generationConfig: {
+          maxOutputTokens: 1000,
+          temperature: 0.7,
+        },
       };
 
-      // Older models (like gemini-pro) do not accept systemInstruction in config
-      if (modelName !== 'gemini-pro') {
-        modelOptions.systemInstruction = SYSTEM_INSTRUCTION;
+      const restRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(restPayload),
+        }
+      );
+
+      if (restRes.ok) {
+        const data = await restRes.json();
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          console.log(`[AI Assistant] Responded successfully via Direct REST using model: ${modelName}`);
+          return res.json({
+            reply: text,
+            isFallback: false,
+            modelUsed: modelName,
+          });
+        }
+      } else {
+        const errorData = await restRes.text();
+        console.warn(`[AI Assistant] Direct REST ${modelName} HTTP ${restRes.status}:`, errorData);
       }
-
-      const model = genAI.getGenerativeModel(modelOptions);
-
-      // Attempt multi-turn chat first
-      try {
-        const chat = model.startChat({
-          history: formattedHistory,
-          generationConfig: {
-            maxOutputTokens: 1000,
-            temperature: 0.7,
-          },
-        });
-
-        const result = await chat.sendMessage(message);
-        const responseText = result.response.text();
-
-        console.log(`[AI Assistant] Successfully generated response using model: ${modelName}`);
-        return res.json({
-          reply: responseText,
-          isFallback: false,
-          modelUsed: modelName,
-        });
-      } catch (chatErr) {
-        // Direct single-turn fallback with prepended system instruction
-        const prompt = `${SYSTEM_INSTRUCTION}\n\nStudent (${language}): ${message}`;
-        const singleResult = await model.generateContent(prompt);
-        const singleText = singleResult.response.text();
-
-        console.log(`[AI Assistant] Generated single-turn response using model: ${modelName}`);
-        return res.json({
-          reply: singleText,
-          isFallback: false,
-          modelUsed: modelName,
-        });
-      }
-    } catch (err) {
-      console.warn(`[AI Assistant] Model ${modelName} failed (${err.message}). Trying next...`);
-      lastError = err;
+    } catch (restErr) {
+      console.warn(`[AI Assistant] Direct REST ${modelName} exception:`, restErr.message);
+      lastError = restErr;
     }
   }
 
-  // Graceful fallback if all models fail
-  console.error('[AI Assistant] All Gemini models failed:', lastError ? lastError.message : 'Unknown error');
+  // Graceful fallback if all model candidates fail
+  console.error('[AI Assistant] All models failed:', lastError ? lastError.message : 'Unknown error');
   const reply = getFallbackResponse(message, language);
   res.json({
     reply,

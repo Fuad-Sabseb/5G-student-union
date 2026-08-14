@@ -35,6 +35,9 @@ connectDB();
 
 const app = express();
 
+// Trust proxy for Render / Cloudflare reverse proxies (fixes express-rate-limit X-Forwarded-For validation)
+app.set('trust proxy', 1);
+
 if (helmet) {
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 }
