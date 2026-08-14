@@ -30,4 +30,7 @@ const supportRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+supportRequestSchema.index({ requester: 1, status: 1, createdAt: -1 });
+supportRequestSchema.index({ status: 1, category: 1, createdAt: -1 });
+
 module.exports = mongoose.model('SupportRequest', supportRequestSchema);

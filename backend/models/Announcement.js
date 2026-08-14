@@ -28,9 +28,17 @@ const announcementSchema = new mongoose.Schema(
     imageUrl: { type: String, default: '' },
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'Member', required: true },
     comments: [commentSchema],
+    rsvps: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'Member', required: true },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
     publishedAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );
+
+announcementSchema.index({ type: 1, publishedAt: -1 });
 
 module.exports = mongoose.model('Announcement', announcementSchema);
