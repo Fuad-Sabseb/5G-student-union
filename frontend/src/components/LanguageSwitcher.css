@@ -54,3 +54,17 @@
   font-size: 0.75rem;
   user-select: none;
 }
+
+@media (max-width: 600px) {
+  .tech-lang-switcher {
+    padding: 2px 5px;
+    gap: 2px;
+  }
+  .tech-lang-btn {
+    padding: 2px 4px;
+    font-size: 0.72rem;
+  }
+  .tech-lang-icon-wrap {
+    margin-right: 0;
+  }
+}

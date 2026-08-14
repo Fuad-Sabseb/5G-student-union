@@ -102,6 +102,7 @@
     "login_subtitle": "Welcome back to GBSG.",
     "email": "Email",
     "password": "Password",
+    "forgot_password": "Forgot password?",
     "submit": "Log In",
     "no_account": "Don't have an account?",
     "register_link": "Join the union",
