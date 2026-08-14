@@ -19,28 +19,44 @@ Tone & Style:
 // In-memory fallback responses when API key is missing
 const getFallbackResponse = (message, lang) => {
   const lower = (message || '').toLowerCase();
-  
-  if (lower.includes('exam') || lower.includes('qormaata') || lower.includes('note') || lower.includes('resource') || lower.includes('sanada')) {
+
+  if (
+    lower.includes('exam') ||
+    lower.includes('qormaata') ||
+    lower.includes('note') ||
+    lower.includes('resource') ||
+    lower.includes('sanada')
+  ) {
     return lang === 'or'
       ? "Sanadoota barnootaa, qormaatawwan darban, fi qajeelfamoota barattoota haaraa argachuuf gara kutaa 'Madda Barnootaa' (/resources) deemaa. Achitti gosa barnootaa fi muummee keessaniin calaluun buufachuu dandeessu!"
-      : "You can find past exams, lecture notes, and freshman handbooks in the **Academic Resources** hub (/resources). You can filter materials by department and category!";
+      : 'You can find past exams, lecture notes, and freshman handbooks in the **Academic Resources** hub (/resources). You can filter materials by department and category!';
   }
 
-  if (lower.includes('support') || lower.includes('gargaarsa') || lower.includes('help') || lower.includes('rakkoo')) {
+  if (
+    lower.includes('support') ||
+    lower.includes('gargaarsa') ||
+    lower.includes('help') ||
+    lower.includes('rakkoo')
+  ) {
     return lang === 'or'
       ? "Gargaarsa addaa ykn rakkoo mooraa keessatti isin mudateef, fuula 'Gargaarsa Barbaadi' (/support) irratti tikkeettii banachuun hoggantoota gamtaatti beeksisuu dandeessu."
-      : "For personalized assistance, dorm concerns, or union aid, please open a support ticket under the **Get Support** page (/support). An executive officer will respond directly to your conversation thread!";
+      : 'For personalized assistance, dorm concerns, or union aid, please open a support ticket under the **Get Support** page (/support). An executive officer will respond directly to your conversation thread!';
   }
 
-  if (lower.includes('member') || lower.includes('miseens') || lower.includes('join') || lower.includes('galmee')) {
+  if (
+    lower.includes('member') ||
+    lower.includes('miseens') ||
+    lower.includes('join') ||
+    lower.includes('galmee')
+  ) {
     return lang === 'or'
       ? "Miseensa Gamtaa Barattoota Shanan Gibee ta'uuf fuula 'Nutti Makami' (/register) irratti odeeffannoo keessan guutaa. Hoggansi gamtaa galmee keessan mirkaneessee daashboordii keessan isiniif bana."
-      : "To join the Shanan Gibe Student Union, register your account at /register. Once submitted, an executive admin will review and approve your active membership!";
+      : 'To join the Shanan Gibe Student Union, register your account at /register. Once submitted, an executive admin will review and approve your active membership!';
   }
 
   return lang === 'or'
     ? "Akkam! Ani Gargaaraa AI Gamtaa Barattoota Shanan Gibee ti. Waa'ee barnootaa, qormaatawwan darban (/resources), marii hawaasaa (/community), ykn gargaarsa gamtaa (/support) na gaafachuu dandeessu. Maal isin gargaaruu danda'a?"
-    : "Hello! I am the GBSG AI Student Assistant. I can help you with campus questions, academic resources (/resources), community discussions (/community), or union support (/support). How can I help you today?";
+    : 'Hello! I am the GBSG AI Student Assistant. I can help you with campus questions, academic resources (/resources), community discussions (/community), or union support (/support). How can I help you today?';
 };
 
 // @desc    Process AI chat conversation with Gemini API
@@ -54,67 +70,106 @@ const handleAIChat = asyncHandler(async (req, res) => {
     throw new Error('Message content is required');
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const rawKey = process.env.GEMINI_API_KEY || '';
+  const apiKey = rawKey.trim().replace(/^"|"$/g, '');
 
   if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
-    // Return intelligent fallback response
+    console.warn('[AI Assistant] GEMINI_API_KEY is not configured in environment variables.');
     const reply = getFallbackResponse(message, language);
     return res.json({
       reply,
       isFallback: true,
-      note: 'Using offline union assistant mode. Configure GEMINI_API_KEY in backend/.env for live generative AI responses.',
+      note: 'Using offline fallback. Please set GEMINI_API_KEY in your hosting dashboard (Render) environment variables for real-time generative responses.',
     });
   }
 
+  // Official public Gemini model IDs
   const modelCandidates = [
-    'gemini-3.1-flash-lite',
-    'gemini-3.5-flash-lite',
-    'gemini-flash-lite-latest',
-    'gemini-flash-latest',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-8b',
+    'gemini-1.5-pro',
+    'gemini-pro',
   ];
 
   const genAI = new GoogleGenerativeAI(apiKey);
   let lastError = null;
 
-  // Format chat history for multi-turn conversations
-  const formattedHistory = (history || [])
-    .filter((item) => item && item.text && item.text.trim())
-    .map((item) => ({
-      role: item.sender === 'user' ? 'user' : 'model',
-      parts: [{ text: item.text }],
-    }));
+  // Format valid chat history
+  const formattedHistory = [];
+  let lastRole = null;
+  for (const item of history || []) {
+    if (item && item.text && item.text.trim()) {
+      const role = item.sender === 'user' ? 'user' : 'model';
+      // Ensure history strictly alternates roles as required by Gemini API
+      if (role !== lastRole) {
+        formattedHistory.push({
+          role,
+          parts: [{ text: item.text.trim() }],
+        });
+        lastRole = role;
+      }
+    }
+  }
+
+  // Ensure history does not end on a 'user' turn before we send a new user message
+  if (formattedHistory.length > 0 && formattedHistory[formattedHistory.length - 1].role === 'user') {
+    formattedHistory.pop();
+  }
 
   for (const modelName of modelCandidates) {
     try {
-      const model = genAI.getGenerativeModel({
+      const modelOptions = {
         model: modelName,
-        systemInstruction: SYSTEM_INSTRUCTION,
-      });
+      };
 
-      const chat = model.startChat({
-        history: formattedHistory,
-        generationConfig: {
-          maxOutputTokens: 1000,
-          temperature: 0.7,
-        },
-      });
+      // Older models (like gemini-pro) do not accept systemInstruction in config
+      if (modelName !== 'gemini-pro') {
+        modelOptions.systemInstruction = SYSTEM_INSTRUCTION;
+      }
 
-      const result = await chat.sendMessage(message);
-      const responseText = result.response.text();
+      const model = genAI.getGenerativeModel(modelOptions);
 
-      return res.json({
-        reply: responseText,
-        isFallback: false,
-        modelUsed: modelName,
-      });
+      // Attempt multi-turn chat first
+      try {
+        const chat = model.startChat({
+          history: formattedHistory,
+          generationConfig: {
+            maxOutputTokens: 1000,
+            temperature: 0.7,
+          },
+        });
+
+        const result = await chat.sendMessage(message);
+        const responseText = result.response.text();
+
+        console.log(`[AI Assistant] Successfully generated response using model: ${modelName}`);
+        return res.json({
+          reply: responseText,
+          isFallback: false,
+          modelUsed: modelName,
+        });
+      } catch (chatErr) {
+        // Direct single-turn fallback with prepended system instruction
+        const prompt = `${SYSTEM_INSTRUCTION}\n\nStudent (${language}): ${message}`;
+        const singleResult = await model.generateContent(prompt);
+        const singleText = singleResult.response.text();
+
+        console.log(`[AI Assistant] Generated single-turn response using model: ${modelName}`);
+        return res.json({
+          reply: singleText,
+          isFallback: false,
+          modelUsed: modelName,
+        });
+      }
     } catch (err) {
-      console.warn(`Model ${modelName} unavailable (${err.message}). Trying next...`);
+      console.warn(`[AI Assistant] Model ${modelName} failed (${err.message}). Trying next...`);
       lastError = err;
     }
   }
 
   // Graceful fallback if all models fail
-  console.error('All Gemini models failed:', lastError ? lastError.message : 'Unknown error');
+  console.error('[AI Assistant] All Gemini models failed:', lastError ? lastError.message : 'Unknown error');
   const reply = getFallbackResponse(message, language);
   res.json({
     reply,
