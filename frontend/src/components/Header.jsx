@@ -144,7 +144,10 @@ export default function Header() {
             <div className="logo-glow-ring" />
           </div>
           <div className="site-header__titles">
-            <span className="site-header__name">Gamtaa Barattoota Shanan Gibee</span>
+            <span className="site-header__name">
+              <span className="brand-name--full">Gamtaa Barattoota Shanan Gibee</span>
+              <span className="brand-name--short">Gamtaa GBSG</span>
+            </span>
             <span className="site-header__subname">Shanan Gibe Student Union • Jimma University</span>
           </div>
         </Link>
