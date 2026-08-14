@@ -5,6 +5,7 @@
 
 backend/.env
 backend/.env.example
+backend/data/
 
 # Dependency folders
 node_modules/
@@ -26,4 +27,3 @@ uploads/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
