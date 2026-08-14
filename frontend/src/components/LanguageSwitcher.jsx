@@ -1,27 +1,36 @@
 import { useTranslation } from 'react-i18next';
+import { IconGlobeTech } from './TechIcons';
 import './LanguageSwitcher.css';
 
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
+  const currentLang = i18n.language === 'or' ? 'or' : 'en';
 
   const setLang = (lng) => {
     i18n.changeLanguage(lng);
   };
 
   return (
-    <div className="lang-switch" role="group" aria-label="Language / Afaan">
+    <div className="tech-lang-switcher" role="group" aria-label="Language / Afaan">
+      <div className="tech-lang-icon-wrap">
+        <IconGlobeTech size={15} color="var(--color-star-gold)" />
+      </div>
       <button
-        className={i18n.language === 'en' ? 'lang-switch__btn is-active' : 'lang-switch__btn'}
+        type="button"
+        className={`tech-lang-btn ${currentLang === 'en' ? 'is-active' : ''}`}
         onClick={() => setLang('en')}
-        aria-pressed={i18n.language === 'en'}
+        aria-pressed={currentLang === 'en'}
+        title="English"
       >
         EN
       </button>
-      <span className="lang-switch__divider" aria-hidden="true">/</span>
+      <span className="tech-lang-divider">|</span>
       <button
-        className={i18n.language === 'or' ? 'lang-switch__btn is-active' : 'lang-switch__btn'}
+        type="button"
+        className={`tech-lang-btn ${currentLang === 'or' ? 'is-active' : ''}`}
         onClick={() => setLang('or')}
-        aria-pressed={i18n.language === 'or'}
+        aria-pressed={currentLang === 'or'}
+        title="Afaan Oromoo"
       >
         OR
       </button>
