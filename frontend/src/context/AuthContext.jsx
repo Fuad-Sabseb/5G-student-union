@@ -7,6 +7,18 @@ export function AuthProvider({ children }) {
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const loadProfile = async () => {
+    try {
+      const token = localStorage.getItem('gbsg_token');
+      if (!token) return null;
+      const res = await api.get('/auth/profile');
+      setMember(res.data);
+      return res.data;
+    } catch (err) {
+      return null;
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('gbsg_token');
     if (!token) {
@@ -49,7 +61,18 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ member, loading, login, register, googleLogin, logout }}>
+    <AuthContext.Provider
+      value={{
+        member,
+        setMember,
+        loading,
+        login,
+        register,
+        googleLogin,
+        logout,
+        loadProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import api from '../api/client';
+import api, { getMediaUrl } from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import { IconUserTech, IconShieldLock } from '../components/TechIcons';
+import { IconUserTech, IconShieldLock, IconCheckTech } from '../components/TechIcons';
 import '../styles/authForm.css';
 import '../styles/listing.css';
 import './Profile.css';
@@ -61,24 +61,61 @@ export default function Profile() {
   };
 
   const handleAvatarUpload = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validate image format and size (max 5MB)
+    if (!file.type.startsWith('image/')) {
+      setProfileMsg({ type: 'error', text: 'Please select a valid image file (JPG, PNG, WebP).' });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setProfileMsg({ type: 'error', text: 'Image size must be less than 5MB.' });
+      return;
+    }
 
     const formData = new FormData();
     formData.append('image', file);
 
     setUploadingImage(true);
     setProfileMsg({ type: '', text: '' });
+
     try {
+      // 1. Upload file to server
       const res = await api.post('/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setProfileForm((prev) => ({ ...prev, profileImageUrl: res.data.url }));
-      setProfileMsg({ type: 'success', text: 'Profile picture uploaded! Click Save to apply changes.' });
+
+      const uploadedUrl = res.data.imageUrl || res.data.url;
+      if (!uploadedUrl) {
+        throw new Error('Upload succeeded but no image URL was returned.');
+      }
+
+      // 2. Update local form state immediately
+      setProfileForm((prev) => ({ ...prev, profileImageUrl: uploadedUrl }));
+
+      // 3. Persist avatar change to member profile immediately
+      await api.put('/auth/profile', { profileImageUrl: uploadedUrl });
+
+      // 4. Refresh global AuthContext so header & views update in real-time
+      if (loadProfile) {
+        await loadProfile();
+      }
+
+      setProfileMsg({
+        type: 'success',
+        text: 'Profile photo uploaded and saved successfully!',
+      });
     } catch (err) {
-      setProfileMsg({ type: 'error', text: err.response?.data?.message || 'Failed to upload photo.' });
+      setProfileMsg({
+        type: 'error',
+        text: err.response?.data?.message || err.message || 'Failed to upload photo.',
+      });
     } finally {
       setUploadingImage(false);
+      // Reset input value so user can upload the same file again if desired
+      e.target.value = '';
     }
   };
 
@@ -93,7 +130,10 @@ export default function Profile() {
         yearOfStudy: profileForm.yearOfStudy ? Number(profileForm.yearOfStudy) : undefined,
       });
       if (loadProfile) await loadProfile();
-      setProfileMsg({ type: 'success', text: t('profile_page.profile_updated') || 'Profile updated successfully!' });
+      setProfileMsg({
+        type: 'success',
+        text: t('profile_page.profile_updated') || 'Profile updated successfully!',
+      });
     } catch (err) {
       setProfileMsg({
         type: 'error',
@@ -125,7 +165,10 @@ export default function Profile() {
         newPassword: passwordForm.newPassword,
       });
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setPasswordMsg({ type: 'success', text: t('profile_page.password_updated') || 'Password changed successfully!' });
+      setPasswordMsg({
+        type: 'success',
+        text: t('profile_page.password_updated') || 'Password changed successfully!',
+      });
     } catch (err) {
       setPasswordMsg({
         type: 'error',
@@ -153,18 +196,25 @@ export default function Profile() {
             <div className="avatar-preview-box">
               <div className="avatar-circle">
                 {profileForm.profileImageUrl ? (
-                  <img src={profileForm.profileImageUrl} alt={profileForm.fullName} />
+                  <img
+                    src={getMediaUrl(profileForm.profileImageUrl)}
+                    alt={profileForm.fullName}
+                    onError={(e) => {
+                      // Fallback if image path fails to load
+                      e.target.style.display = 'none';
+                    }}
+                  />
                 ) : (
                   <span className="avatar-initials">
                     {profileForm.fullName ? profileForm.fullName.charAt(0).toUpperCase() : 'G'}
                   </span>
                 )}
               </div>
-              <label className="btn btn--outline btn--sm avatar-upload-btn">
+              <label className="btn btn--outline btn--sm avatar-upload-btn" style={{ cursor: 'pointer' }}>
                 {uploadingImage ? t('common.loading') : (t('profile_page.change_photo') || 'Upload Photo')}
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
                   onChange={handleAvatarUpload}
                   style={{ display: 'none' }}
                   disabled={uploadingImage}
@@ -330,7 +380,7 @@ export default function Profile() {
 
                 <form onSubmit={handlePasswordSubmit} className="auth-form" style={{ maxWidth: '440px' }}>
                   <label>
-                    {t('profile_page.current_password') || 'Current Password'}
+                    {t('profile_page.current_password')} *
                     <input
                       type="password"
                       name="currentPassword"
@@ -343,7 +393,7 @@ export default function Profile() {
                   </label>
 
                   <label>
-                    {t('profile_page.new_password') || 'New Password'}
+                    {t('profile_page.new_password')} *
                     <input
                       type="password"
                       name="newPassword"
@@ -357,7 +407,7 @@ export default function Profile() {
                   </label>
 
                   <label>
-                    {t('profile_page.confirm_password') || 'Confirm New Password'}
+                    {t('profile_page.confirm_password')} *
                     <input
                       type="password"
                       name="confirmPassword"

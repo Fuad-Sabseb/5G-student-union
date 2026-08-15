@@ -13,7 +13,13 @@ const supportRequestSchema = new mongoose.Schema(
     requester: { type: mongoose.Schema.Types.ObjectId, ref: 'Member', required: true },
     category: {
       type: String,
-      enum: ['academic-mentorship', 'conflict-resolution', 'orientation-help', 'general-support'],
+      enum: [
+        'academic-mentorship',
+        'conflict-resolution',
+        'orientation-help',
+        'general-support',
+        'alumni-connection',
+      ],
       required: true,
     },
     subject: { type: String, required: true, trim: true },

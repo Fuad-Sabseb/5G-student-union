@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
   getMembers,
+  getAlumniDirectory,
   getLeadershipDirectory,
   getMemberById,
   updateMember,
@@ -9,7 +10,8 @@ const {
 } = require('../controllers/memberController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
-// Public route — must be declared before the '/:id' route to avoid collision
+// Public routes — must be declared before the '/:id' route to avoid collision
+router.get('/alumni', getAlumniDirectory);
 router.get('/leadership', getLeadershipDirectory);
 
 router.get('/', protect, adminOnly, getMembers);

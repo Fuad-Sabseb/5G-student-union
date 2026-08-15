@@ -66,7 +66,6 @@ export default function TechNetworkCanvas() {
       const currentCount = isMobile ? 35 : (width > 1400 ? 90 : 65);
 
       for (let i = 0; i < currentCount; i++) {
-        // Distribute in 3D volume
         const isGold = Math.random() > 0.72; // Star Gold accent nodes
         nodes.push({
           x: (Math.random() - 0.5) * width * 1.4,
@@ -322,7 +321,6 @@ export default function TechNetworkCanvas() {
 
         if (p.isGold) {
           ctx.fillStyle = `rgba(217, 164, 65, ${p.alpha})`;
-          // Outer halo for gold nodes
           if (p.scale > 0.85) {
             ctx.shadowColor = 'rgba(217, 164, 65, 0.5)';
             ctx.shadowBlur = 6 * p.scale;
