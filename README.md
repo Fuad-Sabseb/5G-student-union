@@ -1,4 +1,5 @@
-<img width="1352" height="729" alt="Screenshot 2026-07-30 at 9 01 43 at night" src="https://github.com/user-attachments/assets/66f17bdb-6afc-40bd-aaa5-9a3f6206de01" />
+<img width="1352" height="848" alt="Screenshot 2026-08-16 at 9 30 48 in the morning" src="https://github.com/user-attachments/assets/f7a6bf2e-bb17-4d8f-be37-f447122f4dfb" />
+
 # Gamtaa Barattoota Shanan Gibee (Shanan Gibe Student Union) — Website
 
 A full-stack MERN web application built for the Shanan Gibe Student Union at Jimma University. Features full bilingual support in **English (en)** and **Afaan Oromo (or)**.
