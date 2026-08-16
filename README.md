@@ -1,4 +1,5 @@
-![Uploading Screenshot 2026-08-16 at 9.31.52 in the morning.png…]()
+<img width="1352" height="759" alt="Screenshot 2026-08-16 at 9 32 55 in the morning" src="https://github.com/user-attachments/assets/a90b11f5-a119-499a-a891-3c65727f11ab" />
+
 
 
 # Gamtaa Barattoota Shanan Gibee (Shanan Gibe Student Union) — Website
