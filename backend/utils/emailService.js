@@ -99,7 +99,7 @@ const sendVerificationEmail = async (toEmail, code, language = 'or') => {
       console.log(`\n======================================================`);
       console.log(`📬 [DEV OTP CODE for ${toEmail}]: ${code}`);
       console.log(`======================================================\n`);
-      return { success: true, delivered: false, error: err.message };
+      return { success: true, delivered: false, isDevMode: true, error: err.message };
     }
   } else {
     // Development / No SMTP credentials configured yet
