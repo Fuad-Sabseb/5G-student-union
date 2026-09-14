@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { extractNameFromGmail } from './Login';
 import GoogleAccountChooserModal from '../components/GoogleAccountChooserModal';
+import TermsOfServiceModal from '../components/TermsOfServiceModal';
 import {
   IconShieldLock,
   IconMailTech,
@@ -34,6 +35,14 @@ const initialForm = {
   yearOfStudy: '',
   homeArea: '',
   preferredLanguage: 'or',
+  isAlumni: false,
+  graduationYear: '',
+  currentOccupation: '',
+  currentCompany: '',
+  currentLocation: '',
+  linkedinUrl: '',
+  alumniBio: '',
+  willingToMentor: false,
 };
 
 export default function Register() {
@@ -53,6 +62,8 @@ export default function Register() {
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [googleChooserOpen, setGoogleChooserOpen] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(true);
+  const [termsModalOpen, setTermsModalOpen] = useState(false);
   const otpInputRef = useRef(null);
 
   // If already logged in, redirect to home
@@ -80,7 +91,9 @@ export default function Register() {
   }, [step]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    const val = type === 'checkbox' ? checked : value;
+
     if (name === 'fullName') {
       setHasManuallyEditedName(true);
     }
@@ -94,7 +107,7 @@ export default function Register() {
       }));
       return;
     }
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: val }));
   };
 
   // Step 1: Send verification code to Gmail
@@ -161,7 +174,9 @@ export default function Register() {
         ...form,
         email: form.email.trim().toLowerCase(),
         fullName: form.fullName || extractNameFromGmail(form.email) || form.email.split('@')[0],
-        yearOfStudy: form.yearOfStudy ? Number(form.yearOfStudy) : undefined,
+        yearOfStudy: form.isAlumni ? undefined : form.yearOfStudy ? Number(form.yearOfStudy) : undefined,
+        graduationYear: form.isAlumni && form.graduationYear ? Number(form.graduationYear) : undefined,
+        studentId: form.isAlumni ? undefined : form.studentId,
         verificationCode: verificationCode.trim(),
       });
       setSuccess(true);
@@ -183,6 +198,12 @@ export default function Register() {
       await googleLogin({
         ...googlePayload,
         preferredLanguage: form.preferredLanguage,
+        isAlumni: form.isAlumni,
+        graduationYear: form.isAlumni && form.graduationYear ? Number(form.graduationYear) : undefined,
+        currentOccupation: form.currentOccupation,
+        currentCompany: form.currentCompany,
+        currentLocation: form.currentLocation,
+        willingToMentor: form.willingToMentor,
       });
       setGoogleChooserOpen(false);
       setSuccess(true);
@@ -221,23 +242,73 @@ export default function Register() {
             </div>
           )}
 
-          {/* Registration Mode Tabs */}
-          <div className="auth-tabs" role="tablist">
+          {/* Top Quick Actions matching Image 1 */}
+          <div className="signup-hero-actions">
             <button
               type="button"
-              className={`auth-tab ${formType === 'full' ? 'is-active' : ''}`}
-              onClick={() => setFormType('full')}
+              className="btn--continue-email"
+              onClick={() => {}}
             >
-              {t('membership.tab_full')}
+              <IconMailTech size={20} color="#ffffff" />
+              <span>CONTINUE WITH EMAIL</span>
             </button>
+
+            <div className="auth-divider">
+              <span>OR</span>
+            </div>
+
             <button
               type="button"
-              className={`auth-tab ${formType === 'quick' ? 'is-active' : ''}`}
-              onClick={() => setFormType('quick')}
+              className="btn--continue-google"
+              onClick={() => setGoogleChooserOpen(true)}
             >
-              {t('membership.tab_quick')}
+              <GoogleIcon />
+              <span>CONTINUE WITH GOOGLE</span>
             </button>
           </div>
+
+          {/* Member Category: Student vs Alumnus Toggle */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--color-gibe-dusk)' }}>
+              {t('membership.member_type')}
+            </label>
+            <div className="auth-tabs" role="tablist">
+              <button
+                type="button"
+                className={`auth-tab ${!form.isAlumni ? 'is-active' : ''}`}
+                onClick={() => setForm((prev) => ({ ...prev, isAlumni: false }))}
+              >
+                🎓 {t('membership.type_student')}
+              </button>
+              <button
+                type="button"
+                className={`auth-tab ${form.isAlumni ? 'is-active' : ''}`}
+                onClick={() => setForm((prev) => ({ ...prev, isAlumni: true }))}
+              >
+                💼 {t('membership.type_alumni')}
+              </button>
+            </div>
+          </div>
+
+          {/* Registration Mode Tabs */}
+          {!form.isAlumni && (
+            <div className="auth-tabs" role="tablist" style={{ marginBottom: '1rem' }}>
+              <button
+                type="button"
+                className={`auth-tab ${formType === 'full' ? 'is-active' : ''}`}
+                onClick={() => setFormType('full')}
+              >
+                {t('membership.tab_full')}
+              </button>
+              <button
+                type="button"
+                className={`auth-tab ${formType === 'quick' ? 'is-active' : ''}`}
+                onClick={() => setFormType('quick')}
+              >
+                {t('membership.tab_quick')}
+              </button>
+            </div>
+          )}
 
           <p className="form-notice">{t('membership.pending_notice')}</p>
 
@@ -343,7 +414,7 @@ export default function Register() {
                       required
                       value={form.email}
                       onChange={handleChange}
-                      placeholder="student@gmail.com"
+                      placeholder="user@gmail.com"
                       autoComplete="email"
                     />
                   </label>
@@ -373,9 +444,23 @@ export default function Register() {
                     />
                   </label>
 
-                  {/* Additional student details shown in full mode */}
-                  {formType === 'full' && (
+                  {/* Dynamic Fields for ALUMNI vs CURRENT STUDENT */}
+                  {form.isAlumni ? (
                     <>
+                      <label>
+                        {t('membership.graduation_year')} *
+                        <input
+                          type="number"
+                          name="graduationYear"
+                          required
+                          min={1980}
+                          max={2050}
+                          value={form.graduationYear}
+                          onChange={handleChange}
+                          placeholder="e.g. 2023"
+                        />
+                      </label>
+
                       <label>
                         {t('membership.phone')}
                         <input
@@ -385,55 +470,145 @@ export default function Register() {
                           placeholder="+251 9..."
                         />
                       </label>
+
                       <label>
-                        {t('membership.student_id')}
+                        {t('membership.current_occupation')} *
                         <input
-                          name="studentId"
-                          value={form.studentId}
+                          name="currentOccupation"
+                          required
+                          value={form.currentOccupation}
                           onChange={handleChange}
-                          placeholder="e.g. R/1234/14"
+                          placeholder="e.g. Software Engineer / Physician"
                         />
                       </label>
+
                       <label>
-                        {t('membership.campus')}
+                        {t('membership.current_company')}
                         <input
-                          name="campus"
-                          value={form.campus}
+                          name="currentCompany"
+                          value={form.currentCompany}
                           onChange={handleChange}
-                          placeholder="e.g. Jimma University Main Campus"
+                          placeholder="e.g. Ethio Telecom / St. Paul Hospital"
                         />
                       </label>
+
+                      <label>
+                        {t('membership.current_location')}
+                        <input
+                          name="currentLocation"
+                          value={form.currentLocation}
+                          onChange={handleChange}
+                          placeholder="e.g. Addis Ababa, Ethiopia"
+                        />
+                      </label>
+
                       <label>
                         {t('membership.department')}
                         <input
                           name="department"
                           value={form.department}
                           onChange={handleChange}
-                          placeholder="e.g. Computer Science / Medicine"
+                          placeholder="e.g. Electrical Engineering"
                         />
                       </label>
-                      <label>
-                        {t('membership.year_of_study')}
+
+                      <label className="span-2">
+                        {t('membership.linkedin_url')}
                         <input
-                          type="number"
-                          min="1"
-                          max="7"
-                          name="yearOfStudy"
-                          value={form.yearOfStudy}
+                          type="url"
+                          name="linkedinUrl"
+                          value={form.linkedinUrl}
                           onChange={handleChange}
-                          placeholder="1 - 7"
+                          placeholder="https://linkedin.com/in/username"
                         />
                       </label>
-                      <label>
-                        {t('membership.home_area')}
-                        <input
-                          name="homeArea"
-                          value={form.homeArea}
+
+                      <label className="span-2">
+                        {t('membership.alumni_bio')}
+                        <textarea
+                          name="alumniBio"
+                          rows={3}
+                          value={form.alumniBio}
                           onChange={handleChange}
-                          placeholder="Kebele / Woreda in Shanan Gibe"
+                          placeholder="Share your current work or advice for union students..."
                         />
+                      </label>
+
+                      <label className="span-2" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer', marginTop: '0.25rem' }}>
+                        <input
+                          type="checkbox"
+                          name="willingToMentor"
+                          checked={form.willingToMentor}
+                          onChange={handleChange}
+                          style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '0.9rem', color: 'var(--color-gibe-dusk)', fontWeight: 600 }}>
+                          ⭐ {t('membership.willing_to_mentor')}
+                        </span>
                       </label>
                     </>
+                  ) : (
+                    formType === 'full' && (
+                      <>
+                        <label>
+                          {t('membership.phone')}
+                          <input
+                            name="phone"
+                            value={form.phone}
+                            onChange={handleChange}
+                            placeholder="+251 9..."
+                          />
+                        </label>
+                        <label>
+                          {t('membership.student_id')}
+                          <input
+                            name="studentId"
+                            value={form.studentId}
+                            onChange={handleChange}
+                            placeholder="e.g. R/1234/14"
+                          />
+                        </label>
+                        <label>
+                          {t('membership.campus')}
+                          <input
+                            name="campus"
+                            value={form.campus}
+                            onChange={handleChange}
+                            placeholder="e.g. Jimma University Main Campus"
+                          />
+                        </label>
+                        <label>
+                          {t('membership.department')}
+                          <input
+                            name="department"
+                            value={form.department}
+                            onChange={handleChange}
+                            placeholder="e.g. Computer Science / Medicine"
+                          />
+                        </label>
+                        <label>
+                          {t('membership.year_of_study')}
+                          <input
+                            type="number"
+                            min="1"
+                            max="7"
+                            name="yearOfStudy"
+                            value={form.yearOfStudy}
+                            onChange={handleChange}
+                            placeholder="1 - 7"
+                          />
+                        </label>
+                        <label>
+                          {t('membership.home_area')}
+                          <input
+                            name="homeArea"
+                            value={form.homeArea}
+                            onChange={handleChange}
+                            placeholder="Kebele / Woreda in Shanan Gibe"
+                          />
+                        </label>
+                      </>
+                    )
                   )}
 
                   <label className="span-2">
@@ -463,14 +638,39 @@ export default function Register() {
                   </div>
                 )}
 
-                <button type="submit" className="btn btn--gold btn--full" disabled={submitting}>
-                  {submitting
-                    ? t('common.loading')
-                    : form.preferredLanguage === 'or'
-                    ? 'Koodii Mirkaneessaa Ergi →'
-                    : 'Send Verification Code →'}
-                </button>
-              </form>
+                  {/* Terms & Guidelines Checkbox */}
+                  <div style={{ margin: '0.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-gibe-dusk)', fontWeight: 600 }}>
+                      <input
+                        type="checkbox"
+                        checked={agreedToTerms}
+                        onChange={(e) => setAgreedToTerms(e.target.checked)}
+                        style={{ marginTop: '2px', width: '16px', height: '16px', cursor: 'pointer' }}
+                      />
+                      <span>
+                        {form.preferredLanguage === 'or'
+                          ? 'Seera, dambii fi qajeelfama Gamtaa Barattoota Shanan Gibee waliin waliigala.'
+                          : 'I agree to the GBSG Student Union Rules, Guidelines & Terms of Service.'}
+                      </span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setTermsModalOpen(true)}
+                      style={{ background: 'none', border: 'none', color: 'var(--color-star-gold)', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline', alignSelf: 'flex-start', padding: 0 }}
+                    >
+                      <IconShieldLock size={13} style={{ marginRight: 4 }} />
+                      {form.preferredLanguage === 'or' ? 'Seera Gamtaa Dubbisuaf' : 'View Union Rules & Terms of Service'}
+                    </button>
+                  </div>
+
+                  <button type="submit" className="btn btn--gold btn--full" disabled={submitting}>
+                    {submitting
+                      ? t('common.loading')
+                      : form.preferredLanguage === 'or'
+                      ? 'Koodii Mirkaneessaa Ergi →'
+                      : 'Send Verification Code →'}
+                  </button>
+                </form>
 
               {/* Divider */}
               <div className="auth-divider">
@@ -503,6 +703,13 @@ export default function Register() {
         onClose={() => setGoogleChooserOpen(false)}
         onSelectAccount={handleGoogleAccountSelected}
         isLoading={submitting}
+      />
+
+      {/* Union Rules & Terms of Service Modal */}
+      <TermsOfServiceModal
+        isOpen={termsModalOpen}
+        onClose={() => setTermsModalOpen(false)}
+        onAccept={() => setAgreedToTerms(true)}
       />
     </section>
   );
