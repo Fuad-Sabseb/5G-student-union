@@ -25,8 +25,10 @@ import BlogCreate from './pages/BlogCreate';
 import Support from './pages/Support';
 import SupportDetail from './pages/SupportDetail';
 import Dashboard from './pages/Dashboard';
+import Alumni from './pages/Alumni';
 
 import AdminMembers from './pages/admin/AdminMembers';
+import AdminAlumni from './pages/admin/AdminAlumni';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import AdminAnnouncementForm from './pages/admin/AdminAnnouncementForm';
 import AdminGallery from './pages/admin/AdminGallery';
@@ -38,170 +40,179 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          <Route element={<MainLayout />}>
-            {/* Public authentication routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/membership" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Routes>
+            <Route element={<MainLayout />}>
+              {/* Public authentication routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/membership" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-            {/* Protected browsing routes — require registration / login before browsing */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/about"
-              element={
-                <ProtectedRoute>
-                  <About />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leadership"
-              element={
-                <ProtectedRoute>
-                  <Leadership />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/news"
-              element={
-                <ProtectedRoute>
-                  <NewsEvents />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/news/:id"
-              element={
-                <ProtectedRoute>
-                  <NewsEventDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/resources"
-              element={
-                <ProtectedRoute>
-                  <Resources />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/community"
-              element={
-                <ProtectedRoute>
-                  <Forum />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/community/:id"
-              element={
-                <ProtectedRoute>
-                  <ForumTopicDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/gallery"
-              element={
-                <ProtectedRoute>
-                  <Gallery />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/blog"
-              element={
-                <ProtectedRoute>
-                  <Blog />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/blog/:id"
-              element={
-                <ProtectedRoute>
-                  <BlogDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/blog/new"
-              element={
-                <ProtectedRoute>
-                  <BlogCreate />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/support"
-              element={
-                <ProtectedRoute>
-                  <Support />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/support/:id"
-              element={
-                <ProtectedRoute>
-                  <SupportDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-          </Route>
+              {/* Protected browsing routes — require registration / login before browsing */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/about"
+                element={
+                  <ProtectedRoute>
+                    <About />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/leadership"
+                element={
+                  <ProtectedRoute>
+                    <Leadership />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/alumni"
+                element={
+                  <ProtectedRoute>
+                    <Alumni />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/news"
+                element={
+                  <ProtectedRoute>
+                    <NewsEvents />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/news/:id"
+                element={
+                  <ProtectedRoute>
+                    <NewsEventDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/resources"
+                element={
+                  <ProtectedRoute>
+                    <Resources />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/community"
+                element={
+                  <ProtectedRoute>
+                    <Forum />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/community/:id"
+                element={
+                  <ProtectedRoute>
+                    <ForumTopicDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/gallery"
+                element={
+                  <ProtectedRoute>
+                    <Gallery />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/blog"
+                element={
+                  <ProtectedRoute>
+                    <Blog />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/blog/:id"
+                element={
+                  <ProtectedRoute>
+                    <BlogDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/blog/new"
+                element={
+                  <ProtectedRoute>
+                    <BlogCreate />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/support"
+                element={
+                  <ProtectedRoute>
+                    <Support />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/support/:id"
+                element={
+                  <ProtectedRoute>
+                    <SupportDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
 
-          {/* --- Admin area (role === 'admin' only) --- */}
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <AdminLayout />
-              </AdminRoute>
-            }
-          >
-            <Route index element={<Navigate to="/admin/members" replace />} />
-            <Route path="members" element={<AdminMembers />} />
-            <Route path="announcements" element={<AdminAnnouncements />} />
-            <Route path="announcements/new" element={<AdminAnnouncementForm />} />
-            <Route path="announcements/:id/edit" element={<AdminAnnouncementForm />} />
-            <Route path="gallery" element={<AdminGallery />} />
-            <Route path="blog" element={<AdminBlog />} />
-            <Route path="support" element={<AdminSupport />} />
-            <Route path="support/:id" element={<AdminSupportDetail />} />
-          </Route>
+            {/* --- Admin area (role === 'admin' only) --- */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminLayout />
+                </AdminRoute>
+              }
+            >
+              <Route index element={<Navigate to="/admin/members" replace />} />
+              <Route path="members" element={<AdminMembers />} />
+              <Route path="alumni" element={<AdminAlumni />} />
+              <Route path="announcements" element={<AdminAnnouncements />} />
+              <Route path="announcements/new" element={<AdminAnnouncementForm />} />
+              <Route path="announcements/:id/edit" element={<AdminAnnouncementForm />} />
+              <Route path="gallery" element={<AdminGallery />} />
+              <Route path="blog" element={<AdminBlog />} />
+              <Route path="support" element={<AdminSupport />} />
+              <Route path="support/:id" element={<AdminSupportDetail />} />
+            </Route>
 
-          {/* Catch-all route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+            {/* Catch-all route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
   );
 }
