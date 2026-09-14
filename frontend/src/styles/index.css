@@ -62,15 +62,14 @@ body {
 h1, h2, h3, h4 {
   font-family: var(--font-display);
   margin: 0 0 0.5em;
-  line-height: 1.1;
+  line-height: 1.15;
   color: var(--color-gibe-dusk);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 h1 { font-size: var(--step-2xl); font-weight: 700; }
 h2 { font-size: var(--step-xl); font-weight: 700; }
 h3 { font-size: var(--step-lg); font-weight: 600; }
-h4 { font-size: var(--step-md); font-weight: 600; }
 
 p {
   margin: 0 0 1em;
@@ -81,10 +80,7 @@ a {
   text-decoration: none;
 }
 
-img {
-  max-width: 100%;
-  display: block;
-}
+img { max-width: 100%; display: block; }
 
 button, input, textarea, select {
   font-family: inherit;
@@ -106,6 +102,12 @@ select:focus-visible {
   max-width: var(--content-max);
   margin: 0 auto;
   padding: 0 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 0 1rem;
+  }
 }
 
 .section {

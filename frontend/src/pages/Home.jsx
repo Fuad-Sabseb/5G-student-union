@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import logo from '../assets/gbsg-logo.jpg';
+import PartnersMarquee from '../components/PartnersMarquee';
 import './Home.css';
 
 const StarRow = ({ count = 5 }) => (
@@ -67,6 +68,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ---------- Partners & Collaborators Marquee ---------- */}
+      <PartnersMarquee />
 
       {/* ---------- Why we unite ---------- */}
       <section className="section stats">

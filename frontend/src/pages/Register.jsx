@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { extractNameFromGmail } from './Login';
 import GoogleAccountChooserModal from '../components/GoogleAccountChooserModal';
+import TermsOfServiceModal from '../components/TermsOfServiceModal';
 import {
   IconShieldLock,
   IconMailTech,
@@ -61,6 +62,8 @@ export default function Register() {
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [googleChooserOpen, setGoogleChooserOpen] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(true);
+  const [termsModalOpen, setTermsModalOpen] = useState(false);
   const otpInputRef = useRef(null);
 
   // If already logged in, redirect to home
@@ -263,24 +266,22 @@ export default function Register() {
           </div>
 
           {/* Registration Mode Tabs */}
-          {!form.isAlumni && (
-            <div className="auth-tabs" role="tablist" style={{ marginBottom: '1rem' }}>
-              <button
-                type="button"
-                className={`auth-tab ${formType === 'full' ? 'is-active' : ''}`}
-                onClick={() => setFormType('full')}
-              >
-                {t('membership.tab_full')}
-              </button>
-              <button
-                type="button"
-                className={`auth-tab ${formType === 'quick' ? 'is-active' : ''}`}
-                onClick={() => setFormType('quick')}
-              >
-                {t('membership.tab_quick')}
-              </button>
-            </div>
-          )}
+          <div className="auth-tabs" role="tablist">
+            <button
+              type="button"
+              className={`auth-tab ${formType === 'full' ? 'is-active' : ''}`}
+              onClick={() => setFormType('full')}
+            >
+              {t('membership.tab_full')}
+            </button>
+            <button
+              type="button"
+              className={`auth-tab ${formType === 'quick' ? 'is-active' : ''}`}
+              onClick={() => setFormType('quick')}
+            >
+              {t('membership.tab_quick')}
+            </button>
+          </div>
 
           <p className="form-notice">{t('membership.pending_notice')}</p>
 
@@ -610,14 +611,39 @@ export default function Register() {
                   </div>
                 )}
 
-                <button type="submit" className="btn btn--gold btn--full" disabled={submitting}>
-                  {submitting
-                    ? t('common.loading')
-                    : form.preferredLanguage === 'or'
-                    ? 'Koodii Mirkaneessaa Ergi →'
-                    : 'Send Verification Code →'}
-                </button>
-              </form>
+                  {/* Terms & Guidelines Checkbox */}
+                  <div style={{ margin: '0.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-gibe-dusk)', fontWeight: 600 }}>
+                      <input
+                        type="checkbox"
+                        checked={agreedToTerms}
+                        onChange={(e) => setAgreedToTerms(e.target.checked)}
+                        style={{ marginTop: '2px', width: '16px', height: '16px', cursor: 'pointer' }}
+                      />
+                      <span>
+                        {form.preferredLanguage === 'or'
+                          ? 'Seera, dambii fi qajeelfama Gamtaa Barattoota Shanan Gibee waliin waliigala.'
+                          : 'I agree to the GBSG Student Union Rules, Guidelines & Terms of Service.'}
+                      </span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setTermsModalOpen(true)}
+                      style={{ background: 'none', border: 'none', color: 'var(--color-star-gold)', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline', alignSelf: 'flex-start', padding: 0 }}
+                    >
+                      <IconShieldLock size={13} style={{ marginRight: 4 }} />
+                      {form.preferredLanguage === 'or' ? 'Seera Gamtaa Dubbisuaf' : 'View Union Rules & Terms of Service'}
+                    </button>
+                  </div>
+
+                  <button type="submit" className="btn btn--gold btn--full" disabled={submitting}>
+                    {submitting
+                      ? t('common.loading')
+                      : form.preferredLanguage === 'or'
+                      ? 'Koodii Mirkaneessaa Ergi →'
+                      : 'Send Verification Code →'}
+                  </button>
+                </form>
 
               {/* Divider */}
               <div className="auth-divider">
@@ -650,6 +676,13 @@ export default function Register() {
         onClose={() => setGoogleChooserOpen(false)}
         onSelectAccount={handleGoogleAccountSelected}
         isLoading={submitting}
+      />
+
+      {/* Union Rules & Terms of Service Modal */}
+      <TermsOfServiceModal
+        isOpen={termsModalOpen}
+        onClose={() => setTermsModalOpen(false)}
+        onAccept={() => setAgreedToTerms(true)}
       />
     </section>
   );

@@ -953,7 +953,7 @@
 /* ============ Responsive Breakpoints ============ */
 @media (max-width: 900px) {
   .site-header__inner {
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.85rem;
     gap: 0.5rem;
   }
 
@@ -967,14 +967,15 @@
     flex-shrink: 0;
     gap: 0.45rem;
     margin-left: auto;
+    align-items: center;
   }
 
   .site-header__burger {
     display: flex;
     flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    padding: 6px;
+    width: 38px;
+    height: 38px;
+    padding: 7px;
     align-items: center;
     justify-content: center;
   }
@@ -990,6 +991,12 @@
   .site-header__nav {
     display: none;
   }
+
+  .site-header__actions {
+    border-left: none;
+    padding-left: 0;
+    margin-left: 0;
+  }
 }
 
 @media (max-width: 600px) {
@@ -1002,6 +1009,7 @@
     font-size: 0.95rem;
     font-weight: 800;
     white-space: nowrap;
+    letter-spacing: 0.02em;
   }
 
   .site-header__logo-wrapper {
@@ -1012,5 +1020,22 @@
   .site-header__logo {
     width: 36px;
     height: 36px;
+  }
+
+  .user-avatar-name {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .site-header__inner {
+    padding: 0.4rem 0.65rem;
+    gap: 0.35rem;
+  }
+
+  .header-login-btn,
+  .header-register-btn {
+    padding: 0.38rem 0.65rem;
+    font-size: 0.78rem;
   }
 }

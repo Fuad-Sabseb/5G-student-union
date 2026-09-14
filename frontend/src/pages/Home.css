@@ -30,33 +30,57 @@
 .hero__emblem {
   display: flex;
   justify-content: center;
+  align-items: center;
   position: relative;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 .hero__emblem::before {
   content: '';
   position: absolute;
-  inset: -15px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% + 30px);
+  height: calc(100% + 30px);
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(217, 164, 65, 0.35) 0%, rgba(217, 164, 65, 0) 70%);
-  animation: haloPulse 5s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(217, 164, 65, 0.4) 0%, rgba(217, 164, 65, 0) 70%);
+  animation: haloPulse 4s ease-in-out infinite;
   z-index: 0;
+  pointer-events: none;
 }
 
 .hero__emblem img {
-  width: min(330px, 100%);
+  width: min(320px, 75vw);
+  height: min(320px, 75vw);
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
   border-radius: 50%;
   border: 4px solid var(--color-star-gold);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
   position: relative;
   z-index: 1;
-  animation: floatSlow 12s ease-in-out infinite alternate;
+  animation: heroCircleFloat 6s ease-in-out infinite alternate;
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
 }
 
 .hero__emblem:hover img {
-  transform: scale(1.05) rotate(4deg);
+  transform: translateY(-4px) scale(1.04) rotate(3deg);
   box-shadow: 0 25px 60px rgba(217, 164, 65, 0.5), 0 0 30px rgba(217, 164, 65, 0.4);
+}
+
+@keyframes heroCircleFloat {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(2deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
 }
 
 /* ---------- Meaning ---------- */
@@ -185,9 +209,24 @@
   .hero__grid,
   .stats__grid {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
   .hero__emblem {
     order: -1;
+  }
+  .hero__emblem img {
+    width: min(240px, 70vw);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .hero__actions .btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 

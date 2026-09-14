@@ -178,6 +178,19 @@
 }
 
 @media (max-width: 700px) {
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .admin-toolbar__filters {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  .admin-select,
+  .admin-input {
+    width: 100%;
+  }
   .admin-form__grid {
     grid-template-columns: 1fr;
   }

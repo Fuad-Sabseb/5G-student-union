@@ -44,7 +44,7 @@ const sendVerificationCode = asyncHandler(async (req, res) => {
     success: true,
     message: 'Verification code sent to your email',
     delivered: emailResult.delivered,
-    devCode: emailResult.isDevMode ? code : undefined,
+    devCode: (emailResult.isDevMode || !emailResult.delivered || process.env.NODE_ENV !== 'production') ? code : undefined,
   });
 });
 

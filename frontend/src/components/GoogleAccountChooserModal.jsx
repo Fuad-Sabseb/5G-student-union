@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { extractNameFromGmail } from '../pages/Login';
-import { IconUserAddTech } from './TechIcons';
+import { IconUserAddTech, IconShieldLock, IconCheckTech, IconRefreshTech } from './TechIcons';
+import api from '../api/client';
 import logo from '../assets/gbsg-logo.jpg';
 import './GoogleAccountChooserModal.css';
 
@@ -30,43 +31,58 @@ const DEFAULT_ACCOUNTS = [
   {
     name: 'Fuad Sabseb',
     email: 'fuadsabseb476@gmail.com',
-    color: '#d9534f',
-    letter: 'F',
-  },
-  {
-    name: 'Fuad Sabseb',
-    email: 'fuadsabseb690@gmail.com',
-    color: '#2e7d32',
+    color: '#34a853',
     letter: 'F',
   },
   {
     name: 'Fahi Official',
     email: 'fahiofficial1@gmail.com',
-    color: '#1565c0',
+    color: '#1a73e8',
     letter: 'F',
+  },
+  {
+    name: 'Mindflow Media',
+    email: 'mindflowmedia9510@gmail.com',
+    color: '#00897b',
+    letter: 'M',
   },
   {
     name: 'Fahi',
     email: 'fahijemila@gmail.com',
-    color: '#ad1457',
+    color: '#e91e63',
     letter: 'F',
   },
   {
-    name: 'Fuad Sabseb',
-    email: 'fuadsabseb@gmail.com',
-    color: '#6a1b9a',
-    letter: 'F',
+    name: 'Gamtaa Barattoota Shanan GibeeJU',
+    email: 'gamtaabarattootashanangibeeju@gmail.com',
+    color: '#ea4335',
+    letter: 'G',
   },
 ];
 
 export default function GoogleAccountChooserModal({ isOpen, onClose, onSelectAccount, isLoading }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language === 'or' ? 'or' : 'en';
+
   const [accounts, setAccounts] = useState([]);
-  const [selectedEmail, setSelectedEmail] = useState(null);
+  const [selectedAcc, setSelectedAcc] = useState(null);
+  
+  // Step Management: 'choose' | 'terms' | 'verify'
+  const [modalStep, setModalStep] = useState('choose');
+  
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [newName, setNewName] = useState('');
   const [customError, setCustomError] = useState('');
+  const [sendingCode, setSendingCode] = useState(false);
+
+  // Verification OTP State
+  const [verificationCode, setVerificationCode] = useState('');
+  const [devCode, setDevCode] = useState('');
+  const [resendCountdown, setResendCountdown] = useState(60);
+  const [agreedToTerms, setAgreedToTerms] = useState(true);
+
+  const otpInputRef = useRef(null);
 
   // Load saved accounts or default
   useEffect(() => {
@@ -82,17 +98,33 @@ export default function GoogleAccountChooserModal({ isOpen, onClose, onSelectAcc
     }
   }, []);
 
+  // Resend Countdown Timer
+  useEffect(() => {
+    let timer;
+    if (modalStep === 'verify' && resendCountdown > 0) {
+      timer = setInterval(() => setResendCountdown((prev) => prev - 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [modalStep, resendCountdown]);
+
+  const handleClose = () => {
+    setModalStep('choose');
+    setSelectedAcc(null);
+    setIsAddingNew(false);
+    setCustomError('');
+    setVerificationCode('');
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   const derivedName = extractNameFromGmail(newEmail);
 
-  const handleAccountClick = (acc) => {
-    setSelectedEmail(acc.email);
-    onSelectAccount({
-      email: acc.email,
-      fullName: acc.name,
-      googleId: `google_${acc.email.replace(/[^a-zA-Z0-9]/g, '_')}`,
-    });
+  // 1. Account Chosen ➔ Move to Google Sign-In Consent/Terms Screen
+  const handleChooseAccount = (acc) => {
+    setSelectedAcc(acc);
+    setCustomError('');
+    setModalStep('terms');
   };
 
   const handleAddNewAccount = (e) => {
@@ -110,7 +142,6 @@ export default function GoogleAccountChooserModal({ isOpen, onClose, onSelectAcc
       letter: nameToUse.charAt(0).toUpperCase(),
     };
 
-    // Save in state & localStorage
     const updated = [newAcc, ...accounts.filter((a) => a.email !== newAcc.email)];
     setAccounts(updated);
     try {
@@ -118,144 +149,278 @@ export default function GoogleAccountChooserModal({ isOpen, onClose, onSelectAcc
     } catch (e) {}
 
     setIsAddingNew(false);
-    setSelectedEmail(newAcc.email);
+    setSelectedAcc(newAcc);
+    setCustomError('');
+    setModalStep('terms');
+  };
+
+  // 2. Terms & Consent Accepted ➔ Finalize Google Authentication & Redirect directly
+  const handleAcceptTermsAndContinue = () => {
+    if (!agreedToTerms) {
+      setCustomError(
+        lang === 'or'
+          ? 'Miseensa ta’uudhaaf seera fi dambii gamtaa amanamuun irra jira.'
+          : 'You must accept the GBSG Student Union Rules and Terms of Service to continue.'
+      );
+      return;
+    }
+
+    setCustomError('');
     onSelectAccount({
-      email: newAcc.email,
-      fullName: newAcc.name,
-      googleId: `google_${newAcc.email.replace(/[^a-zA-Z0-9]/g, '_')}`,
+      email: selectedAcc.email,
+      fullName: selectedAcc.name,
+      googleId: `google_${selectedAcc.email.replace(/[^a-zA-Z0-9]/g, '_')}`,
     });
   };
 
   return (
-    <div className="google-chooser-overlay" onClick={onClose}>
+    <div className="google-chooser-overlay" onClick={handleClose}>
       <div className="google-chooser-dialog" onClick={(e) => e.stopPropagation()}>
-        {/* Google Popup Header Bar */}
+        {/* Top Header Bar */}
         <div className="google-chooser-top-bar">
           <div className="google-top-brand">
             <GoogleLogo />
             <span>Sign in with Google</span>
           </div>
-          <button type="button" className="google-chooser-close-btn" onClick={onClose}>
+          <button type="button" className="google-chooser-close-btn" onClick={handleClose}>
             ✕
           </button>
         </div>
 
-        {/* Brand Target Banner */}
-        <div className="google-chooser-body">
-          <div className="google-app-badge">
-            <img src={logo} alt="GBSG" className="google-app-logo" />
-            <div className="google-app-info">
-              <h2>Choose an account</h2>
-              <p>to continue to <strong>Gamtaa Barattoota Shanan Gibee</strong></p>
+        {/* STEP 1: CHOOSE AN ACCOUNT */}
+        {modalStep === 'choose' && (
+          <div className="google-oauth-content">
+            <div className="google-oauth-grid">
+              {/* Left Column */}
+              <div className="google-oauth-left">
+                <h2 className="google-oauth-title">Choose an account</h2>
+                <p className="google-oauth-sub">
+                  to continue to <strong className="app-name-highlight">Gamtaa Barattoota Shanan Gibee</strong>
+                </p>
+              </div>
+
+              {/* Right Column */}
+              <div className="google-oauth-right">
+                {customError && <p className="google-form-error">{customError}</p>}
+
+                {!isAddingNew ? (
+                  <div className="google-account-list">
+                    {accounts.map((acc) => (
+                      <button
+                        key={acc.email}
+                        type="button"
+                        className={`google-account-item ${selectedAcc?.email === acc.email ? 'is-selected' : ''}`}
+                        onClick={() => handleChooseAccount(acc)}
+                        disabled={isLoading}
+                      >
+                        <div
+                          className="google-account-avatar"
+                          style={{ backgroundColor: acc.color || '#1a73e8' }}
+                        >
+                          {acc.letter || acc.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="google-account-details">
+                          <span className="google-account-name">{acc.name}</span>
+                          <span className="google-account-email">{acc.email}</span>
+                        </div>
+                      </button>
+                    ))}
+
+                    <button
+                      type="button"
+                      className="google-account-item google-account-item--add"
+                      onClick={() => {
+                        setIsAddingNew(true);
+                        setCustomError('');
+                      }}
+                      disabled={isLoading}
+                    >
+                      <div className="google-account-avatar google-avatar--add">
+                        <IconUserAddTech size={18} color="#9aa0a6" />
+                      </div>
+                      <div className="google-account-details">
+                        <span className="google-account-name">Use another account</span>
+                      </div>
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleAddNewAccount} className="google-add-account-form">
+                    <label>
+                      Email or phone
+                      <input
+                        type="email"
+                        required
+                        placeholder="name@gmail.com"
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                        autoFocus
+                      />
+                    </label>
+
+                    {derivedName && (
+                      <div className="google-name-detected">
+                        <span>Detected Name:</span>
+                        <strong>{derivedName}</strong>
+                      </div>
+                    )}
+
+                    <label style={{ marginTop: '0.85rem' }}>
+                      Full Name (Optional)
+                      <input
+                        type="text"
+                        placeholder="e.g. Caalaa Tolasaa"
+                        value={newName || derivedName}
+                        onChange={(e) => setNewName(e.target.value)}
+                      />
+                    </label>
+
+                    <div className="google-form-actions">
+                      <button
+                        type="button"
+                        className="google-btn-secondary"
+                        onClick={() => setIsAddingNew(false)}
+                      >
+                        Back to list
+                      </button>
+                      <button type="submit" className="google-btn-primary">
+                        Next
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                <div className="google-chooser-disclaimer">
+                  <p>
+                    Before using this app, you can review Gamtaa Barattoota Shanan Gibee’s{' '}
+                    <a href="#privacy" onClick={(e) => e.preventDefault()}>Privacy Policy</a> and{' '}
+                    <a href="#terms" onClick={(e) => e.preventDefault()}>Terms of Service</a>.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
+        )}
 
-          {/* Account Selection List */}
-          {!isAddingNew ? (
-            <div className="google-account-list">
-              {accounts.map((acc) => (
+        {/* STEP 2: CONSENT & TERMS OF SERVICE */}
+        {modalStep === 'terms' && selectedAcc && (
+          <div className="google-oauth-content">
+            <div className="google-oauth-grid">
+              {/* Left Column */}
+              <div className="google-oauth-left">
+                <h2 className="google-oauth-title">
+                  Sign in to Gamtaa Barattoota Shanan Gibee
+                </h2>
+                
+                {/* Account Pill Dropdown */}
                 <button
-                  key={acc.email}
                   type="button"
-                  className={`google-account-item ${
-                    selectedEmail === acc.email && isLoading ? 'is-loading' : ''
-                  }`}
-                  onClick={() => handleAccountClick(acc)}
-                  disabled={isLoading}
+                  className="google-account-select-pill"
+                  onClick={() => setModalStep('choose')}
                 >
                   <div
-                    className="google-account-avatar"
-                    style={{ backgroundColor: acc.color || '#16324f' }}
+                    className="google-account-avatar-sm"
+                    style={{ backgroundColor: selectedAcc.color || '#1a73e8' }}
                   >
-                    {acc.letter || acc.name.charAt(0).toUpperCase()}
+                    {selectedAcc.letter || selectedAcc.name.charAt(0).toUpperCase()}
                   </div>
-                  <div className="google-account-details">
-                    <span className="google-account-name">{acc.name}</span>
-                    <span className="google-account-email">{acc.email}</span>
-                  </div>
-
-                  {selectedEmail === acc.email && isLoading && (
-                    <div className="google-item-spinner" />
-                  )}
-                </button>
-              ))}
-
-              {/* Use Another Account Button */}
-              <button
-                type="button"
-                className="google-account-item google-account-item--add"
-                onClick={() => {
-                  setIsAddingNew(true);
-                  setCustomError('');
-                }}
-                disabled={isLoading}
-              >
-                <div className="google-account-avatar google-avatar--add">
-                  <IconUserAddTech size={18} color="#a8a8a8" />
-                </div>
-                <div className="google-account-details">
-                  <span className="google-account-name">Use another account</span>
-                </div>
-              </button>
-            </div>
-          ) : (
-            /* Add New Account View */
-            <form onSubmit={handleAddNewAccount} className="google-add-account-form">
-              <label>
-                Email or phone
-                <input
-                  type="email"
-                  required
-                  placeholder="name@gmail.com"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  autoFocus
-                />
-              </label>
-
-              {derivedName && (
-                <div className="google-name-detected">
-                  <span>Detected Name:</span>
-                  <strong>{derivedName}</strong>
-                </div>
-              )}
-
-              <label style={{ marginTop: '0.85rem' }}>
-                Full Name (Optional)
-                <input
-                  type="text"
-                  placeholder="e.g. Caalaa Tolasaa"
-                  value={newName || derivedName}
-                  onChange={(e) => setNewName(e.target.value)}
-                />
-              </label>
-
-              {customError && <p className="google-form-error">{customError}</p>}
-
-              <div className="google-form-actions">
-                <button
-                  type="button"
-                  className="btn btn--outline"
-                  onClick={() => setIsAddingNew(false)}
-                >
-                  Back to list
-                </button>
-                <button type="submit" className="btn btn--gold" disabled={isLoading}>
-                  {isLoading ? 'Signing in...' : 'Sign in'}
+                  <span className="google-pill-email">{selectedAcc.email}</span>
+                  <span className="google-pill-arrow">▾</span>
                 </button>
               </div>
-            </form>
-          )}
 
-          {/* Footer Terms */}
-          <div className="google-chooser-footer">
-            <p>
-              To continue, Google will share your name, email address, and profile picture with
-              Gamtaa Barattoota Shanan Gibee.
-            </p>
+              {/* Right Column */}
+              <div className="google-oauth-right">
+                <p className="google-consent-intro">
+                  Google will allow <strong>Gamtaa Barattoota Shanan Gibee</strong> to access this info about you
+                </p>
+
+                <div className="google-consent-info-list">
+                  <div className="google-consent-info-item">
+                    <div className="google-info-icon">👤</div>
+                    <div className="google-info-text">
+                      <strong>{selectedAcc.name}</strong>
+                      <span>Name and profile picture</span>
+                    </div>
+                  </div>
+
+                  <div className="google-consent-info-item">
+                    <div className="google-info-icon">✉</div>
+                    <div className="google-info-text">
+                      <strong>{selectedAcc.email}</strong>
+                      <span>Email address</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="google-consent-policy-box">
+                  <p>
+                    Review Gamtaa Barattoota Shanan Gibee’s{' '}
+                    <a href="#privacy" onClick={(e) => e.preventDefault()}>Privacy Policy</a> and{' '}
+                    <a href="#terms" onClick={(e) => e.preventDefault()}>Terms of Service</a> to understand how Gamtaa Barattoota Shanan Gibee will process and protect your data.
+                  </p>
+                </div>
+
+                <label className="google-terms-checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => {
+                      setAgreedToTerms(e.target.checked);
+                      if (e.target.checked) setCustomError('');
+                    }}
+                  />
+                  <span>
+                    {lang === 'or'
+                      ? 'Seera, dambii fi qajeelfama Gamtaa Barattoota Shanan Gibee waliin waliigala.'
+                      : 'I agree to the GBSG Student Union Rules, Guidelines & Terms of Service.'}
+                  </span>
+                </label>
+
+                {customError && <p className="google-form-error">{customError}</p>}
+
+                <p className="google-consent-help-text">
+                  To make changes at any time, go to your <strong>Google Account</strong>.
+                </p>
+                <p className="google-consent-help-text" style={{ marginBottom: '1.5rem' }}>
+                  Learn more about <a href="#learn" onClick={(e) => e.preventDefault()}>Sign in with Google</a>.
+                </p>
+
+                <div className="google-oauth-actions">
+                  <button
+                    type="button"
+                    className="google-btn-pill-secondary"
+                    onClick={() => setModalStep('choose')}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="google-btn-pill-primary"
+                    onClick={handleAcceptTermsAndContinue}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Connecting...' : 'Continue'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Bottom Footer Bar */}
+        <div className="google-chooser-bottom-bar">
+          <div className="google-lang-selector">
+            <span>English (United States)</span>
+            <span>▾</span>
+          </div>
+          <div className="google-footer-links">
+            <a href="#help" onClick={(e) => e.preventDefault()}>Help</a>
+            <a href="#privacy" onClick={(e) => e.preventDefault()}>Privacy</a>
+            <a href="#terms" onClick={(e) => e.preventDefault()}>Terms</a>
           </div>
         </div>
       </div>
     </div>
   );
 }
+

@@ -290,9 +290,132 @@
   .auth-form__grid {
     grid-template-columns: 1fr;
   }
-  .otp-box {
-    width: 40px;
-    height: 48px;
-    font-size: 1.2rem;
-  }
 }
+
+/* Email Verification Code (OTP) Card */
+.verification-card {
+  text-align: center;
+  padding: 0.5rem 0;
+  animation: cardEntrance 0.35s ease;
+}
+
+.verification-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(217, 164, 65, 0.15);
+  border: 2px solid var(--color-star-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin: 0 auto 1.2rem;
+}
+
+.verification-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-gibe-dusk);
+  margin-bottom: 0.5rem;
+}
+
+.verification-desc {
+  font-size: 0.92rem;
+  color: var(--color-ink-soft);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.verification-email-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--color-cream);
+  border: 1px solid var(--color-border);
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  font-weight: 600;
+  color: var(--color-gibe-dusk);
+  margin-top: 0.35rem;
+}
+
+.verification-code-input {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto 1.25rem;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace, monospace;
+  font-size: 2rem;
+  letter-spacing: 12px;
+  font-weight: 800;
+  padding: 0.85rem;
+  border: 2px solid var(--color-star-gold);
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  color: var(--color-gibe-dusk);
+  box-shadow: 0 4px 14px rgba(217, 164, 65, 0.15);
+}
+
+.verification-code-input:focus {
+  border-color: #b88628;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(217, 164, 65, 0.3);
+}
+
+.dev-code-banner {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px dashed #10b981;
+  color: #065f46;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.86rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.dev-code-badge {
+  font-family: monospace;
+  font-weight: 800;
+  font-size: 1.1rem;
+  background: #10b981;
+  color: #fff;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  letter-spacing: 2px;
+}
+
+.verification-resend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.86rem;
+}
+
+.btn--resend-code {
+  background: none;
+  border: none;
+  color: var(--color-star-gold);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.btn--resend-code:hover:not(:disabled) {
+  color: #b88628;
+}
+
+.btn--resend-code:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+

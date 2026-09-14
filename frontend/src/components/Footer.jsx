@@ -65,10 +65,18 @@ export default function Footer() {
           <NavLink to="/support">{t('nav.support')}</NavLink>
         </div>
 
-        <div className="site-footer__col">
+        <div className="site-footer__col site-footer__contact-col">
           <h4>{t('footer.contact')}</h4>
-          <p>{t('footer.location')}</p>
-          <p>Jimma University</p>
+          <p className="footer-contact-item">
+            <span className="contact-icon">📍</span> {t('footer.location')} • Jimma University
+          </p>
+          <a
+            href="mailto:gamtaabarattootashanangibeeju@gmail.com"
+            className="footer-contact-item footer-email-link"
+            title="Send Email to GBSG Union"
+          >
+            <span className="contact-icon">✉</span> gamtaabarattootashanangibeeju@gmail.com
+          </a>
         </div>
 
         <div className="site-footer__col site-footer__social-col">
