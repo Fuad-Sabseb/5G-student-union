@@ -5,22 +5,31 @@ function escapeRegex(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }
 
-// @desc    Get all members (with optional filters: status, role, campus, search, pagination)
-// @route   GET /api/members?status=&role=&campus=&search=&page=&limit=
+// @desc    Get all members (with optional filters: status, role, campus, isAlumni, graduationYear, department, search, pagination)
+// @route   GET /api/members?status=&role=&campus=&isAlumni=&graduationYear=&department=&search=&page=&limit=
 // @access  Private/Admin
 const getMembers = asyncHandler(async (req, res) => {
-  const { status, role, campus, search, page = 1, limit = 50 } = req.query;
+  const { status, role, campus, isAlumni, graduationYear, department, search, page = 1, limit = 50 } = req.query;
   const filter = {};
 
   if (status) filter.membershipStatus = status;
   if (role) filter.role = role;
   if (campus) filter.campus = campus;
+  if (department) filter.department = department;
+  if (graduationYear) filter.graduationYear = Number(graduationYear);
+  if (isAlumni !== undefined && isAlumni !== '') {
+    filter.isAlumni = isAlumni === 'true' || isAlumni === true;
+  }
+
   if (search && search.trim()) {
     const sanitized = escapeRegex(search.trim());
     filter.$or = [
       { fullName: { $regex: sanitized, $options: 'i' } },
       { email: { $regex: sanitized, $options: 'i' } },
       { studentId: { $regex: sanitized, $options: 'i' } },
+      { currentOccupation: { $regex: sanitized, $options: 'i' } },
+      { currentCompany: { $regex: sanitized, $options: 'i' } },
+      { currentLocation: { $regex: sanitized, $options: 'i' } },
     ];
   }
 
@@ -35,6 +44,49 @@ const getMembers = asyncHandler(async (req, res) => {
     .limit(limitNum);
 
   res.json(members);
+});
+
+// @desc    Get public alumni directory (only active members with isAlumni: true)
+// @route   GET /api/members/alumni?graduationYear=&department=&willingToMentor=&search=
+// @access  Public
+const getAlumniDirectory = asyncHandler(async (req, res) => {
+  const { graduationYear, department, willingToMentor, search } = req.query;
+  const filter = {
+    isAlumni: true,
+    membershipStatus: 'active',
+  };
+
+  if (graduationYear) {
+    filter.graduationYear = Number(graduationYear);
+  }
+
+  if (department) {
+    filter.department = department;
+  }
+
+  if (willingToMentor === 'true' || willingToMentor === true) {
+    filter.willingToMentor = true;
+  }
+
+  if (search && search.trim()) {
+    const sanitized = escapeRegex(search.trim());
+    filter.$or = [
+      { fullName: { $regex: sanitized, $options: 'i' } },
+      { currentOccupation: { $regex: sanitized, $options: 'i' } },
+      { currentCompany: { $regex: sanitized, $options: 'i' } },
+      { currentLocation: { $regex: sanitized, $options: 'i' } },
+      { alumniBio: { $regex: sanitized, $options: 'i' } },
+    ];
+  }
+
+  // Strictly omit private fields (email, phone, studentId, passwords)
+  const alumni = await Member.find(filter)
+    .select(
+      'fullName graduationYear currentOccupation currentCompany currentLocation linkedinUrl alumniBio willingToMentor profileImageUrl department campus'
+    )
+    .sort({ graduationYear: -1, fullName: 1 });
+
+  res.json(alumni);
 });
 
 // @desc    Get public leadership/executive committee directory
@@ -63,7 +115,7 @@ const getMemberById = asyncHandler(async (req, res) => {
   res.json(member);
 });
 
-// @desc    Update a member's status, role, or leadership info (approve membership, promote to exec, etc.)
+// @desc    Update a member's status, role, or alumni info (approve membership, promote to exec, flip isAlumni, etc.)
 // @route   PUT /api/members/:id
 // @access  Private/Admin
 const updateMember = asyncHandler(async (req, res) => {
@@ -78,11 +130,27 @@ const updateMember = asyncHandler(async (req, res) => {
     'role',
     'leadershipPosition',
     'leadershipOrder',
+    'isAlumni',
+    'graduationYear',
+    'currentOccupation',
+    'currentCompany',
+    'currentLocation',
+    'linkedinUrl',
+    'alumniBio',
+    'willingToMentor',
+    'department',
+    'campus',
   ];
 
   adminEditableFields.forEach((field) => {
     if (req.body[field] !== undefined) {
-      member[field] = req.body[field];
+      if (field === 'graduationYear') {
+        member[field] = req.body[field] ? Number(req.body[field]) : undefined;
+      } else if (field === 'isAlumni' || field === 'willingToMentor') {
+        member[field] = Boolean(req.body[field]);
+      } else {
+        member[field] = req.body[field];
+      }
     }
   });
 
@@ -105,6 +173,7 @@ const deleteMember = asyncHandler(async (req, res) => {
 
 module.exports = {
   getMembers,
+  getAlumniDirectory,
   getLeadershipDirectory,
   getMemberById,
   updateMember,
