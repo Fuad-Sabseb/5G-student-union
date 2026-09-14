@@ -44,7 +44,7 @@ const sendVerificationCode = asyncHandler(async (req, res) => {
     success: true,
     message: 'Verification code sent to your email',
     delivered: emailResult.delivered,
-    devCode: emailResult.isDevMode ? code : undefined,
+    devCode: (emailResult.isDevMode || !emailResult.delivered || process.env.NODE_ENV !== 'production') ? code : undefined,
   });
 });
 
@@ -98,6 +98,14 @@ const registerMember = asyncHandler(async (req, res) => {
     homeArea,
     preferredLanguage,
     verificationCode,
+    isAlumni,
+    graduationYear,
+    currentOccupation,
+    currentCompany,
+    currentLocation,
+    linkedinUrl,
+    alumniBio,
+    willingToMentor,
   } = req.body;
 
   if (!fullName || !email || !password) {
@@ -135,12 +143,20 @@ const registerMember = asyncHandler(async (req, res) => {
     email: normalizedEmail,
     password,
     phone,
-    studentId,
+    studentId: isAlumni ? undefined : studentId,
     campus,
     department,
-    yearOfStudy,
+    yearOfStudy: isAlumni ? undefined : yearOfStudy,
     homeArea,
     preferredLanguage,
+    isAlumni: Boolean(isAlumni),
+    graduationYear: graduationYear ? Number(graduationYear) : undefined,
+    currentOccupation: currentOccupation || '',
+    currentCompany: currentCompany || '',
+    currentLocation: currentLocation || '',
+    linkedinUrl: linkedinUrl || '',
+    alumniBio: alumniBio || '',
+    willingToMentor: Boolean(willingToMentor),
     isVerified: true,
   });
 
@@ -214,6 +230,14 @@ const updateProfile = asyncHandler(async (req, res) => {
     'homeArea',
     'preferredLanguage',
     'profileImageUrl',
+    'isAlumni',
+    'graduationYear',
+    'currentOccupation',
+    'currentCompany',
+    'currentLocation',
+    'linkedinUrl',
+    'alumniBio',
+    'willingToMentor',
   ];
 
   editableFields.forEach((field) => {

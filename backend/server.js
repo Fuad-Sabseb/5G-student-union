@@ -35,6 +35,9 @@ connectDB();
 
 const app = express();
 
+// Trust proxy for Render / Cloudflare reverse proxies (fixes express-rate-limit X-Forwarded-For validation)
+app.set('trust proxy', 1);
+
 if (helmet) {
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 }
@@ -65,12 +68,28 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
 
+const mongoose = require('mongoose');
+
 // Serve uploaded images (gallery photos, post covers, profile pictures)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// --- API Routes ---
+// --- Root & Health Check Routes (Always returns 200 for Render / Uptime monitors) ---
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'Gamtaa Barattoota Shanan Gibee (GBSG) API',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'connecting',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'Shanan Gibe Student Union API' });
+  const isDbReady = mongoose.connection.readyState === 1;
+  res.json({
+    status: 'ok',
+    service: 'Shanan Gibe Student Union API',
+    database: isDbReady ? 'connected' : 'connecting',
+  });
 });
 
 app.use('/api/auth', authRoutes);

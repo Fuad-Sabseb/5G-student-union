@@ -58,6 +58,47 @@ const memberSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // --- Alumni Network fields ---
+    isAlumni: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    graduationYear: {
+      type: Number,
+      min: 1980,
+      max: 2050,
+    },
+    currentOccupation: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    currentCompany: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    currentLocation: {
+      type: String, // e.g. "Addis Ababa, Ethiopia", "Nairobi, Kenya"
+      trim: true,
+      default: '',
+    },
+    linkedinUrl: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    alumniBio: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    willingToMentor: {
+      type: Boolean,
+      default: false,
+    },
+
     // --- Role & membership status ---
     role: {
       type: String,

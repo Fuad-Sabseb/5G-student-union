@@ -242,31 +242,6 @@ export default function Register() {
             </div>
           )}
 
-          {/* Top Quick Actions matching Image 1 */}
-          <div className="signup-hero-actions">
-            <button
-              type="button"
-              className="btn--continue-email"
-              onClick={() => {}}
-            >
-              <IconMailTech size={20} color="#ffffff" />
-              <span>CONTINUE WITH EMAIL</span>
-            </button>
-
-            <div className="auth-divider">
-              <span>OR</span>
-            </div>
-
-            <button
-              type="button"
-              className="btn--continue-google"
-              onClick={() => setGoogleChooserOpen(true)}
-            >
-              <GoogleIcon />
-              <span>CONTINUE WITH GOOGLE</span>
-            </button>
-          </div>
-
           {/* Member Category: Student vs Alumnus Toggle */}
           <div style={{ marginBottom: '1.25rem' }}>
             <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--color-gibe-dusk)' }}>
@@ -291,24 +266,22 @@ export default function Register() {
           </div>
 
           {/* Registration Mode Tabs */}
-          {!form.isAlumni && (
-            <div className="auth-tabs" role="tablist" style={{ marginBottom: '1rem' }}>
-              <button
-                type="button"
-                className={`auth-tab ${formType === 'full' ? 'is-active' : ''}`}
-                onClick={() => setFormType('full')}
-              >
-                {t('membership.tab_full')}
-              </button>
-              <button
-                type="button"
-                className={`auth-tab ${formType === 'quick' ? 'is-active' : ''}`}
-                onClick={() => setFormType('quick')}
-              >
-                {t('membership.tab_quick')}
-              </button>
-            </div>
-          )}
+          <div className="auth-tabs" role="tablist">
+            <button
+              type="button"
+              className={`auth-tab ${formType === 'full' ? 'is-active' : ''}`}
+              onClick={() => setFormType('full')}
+            >
+              {t('membership.tab_full')}
+            </button>
+            <button
+              type="button"
+              className={`auth-tab ${formType === 'quick' ? 'is-active' : ''}`}
+              onClick={() => setFormType('quick')}
+            >
+              {t('membership.tab_quick')}
+            </button>
+          </div>
 
           <p className="form-notice">{t('membership.pending_notice')}</p>
 

@@ -67,10 +67,9 @@ h1, h2, h3, h4 {
   letter-spacing: -0.015em;
 }
 
-h1 { font-size: clamp(1.85rem, 5.2vw, var(--step-2xl)); font-weight: 800; }
-h2 { font-size: clamp(1.45rem, 4vw, var(--step-xl)); font-weight: 700; }
-h3 { font-size: clamp(1.15rem, 2.8vw, var(--step-lg)); font-weight: 600; }
-h4 { font-size: clamp(1rem, 2.2vw, var(--step-md)); font-weight: 600; }
+h1 { font-size: var(--step-2xl); font-weight: 700; }
+h2 { font-size: var(--step-xl); font-weight: 700; }
+h3 { font-size: var(--step-lg); font-weight: 600; }
 
 p {
   margin: 0 0 1em;
@@ -81,11 +80,7 @@ a {
   text-decoration: none;
 }
 
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
+img { max-width: 100%; display: block; }
 
 button, input, textarea, select {
   font-family: inherit;

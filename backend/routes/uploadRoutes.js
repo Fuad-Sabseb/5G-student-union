@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
 const upload = require('../middleware/uploadMiddleware');
 const { protect } = require('../middleware/authMiddleware');
+const { isCloudinaryConfigured, uploadToCloudinary } = require('../config/cloudinary');
 
-// @desc    Upload a single image, get back its URL
+// @desc    Upload a single image, get back its permanent or local URL
 // @route   POST /api/upload
 // @access  Private (any logged-in, active member can upload — e.g. for blog cover images)
 router.post('/', protect, upload.single('image'), (req, res) => {
