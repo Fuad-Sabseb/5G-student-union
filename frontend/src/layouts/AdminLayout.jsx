@@ -7,6 +7,7 @@ export default function AdminLayout() {
 
   const links = [
     { to: '/admin/members', label: t('admin.nav_members') },
+    { to: '/admin/alumni', label: t('admin.nav_alumni') },
     { to: '/admin/announcements', label: t('admin.nav_announcements') },
     { to: '/admin/gallery', label: t('admin.nav_gallery') },
     { to: '/admin/blog', label: t('admin.nav_blog') },
