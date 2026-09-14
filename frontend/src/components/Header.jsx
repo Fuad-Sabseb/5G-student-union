@@ -17,7 +17,7 @@ import {
   IconSettingsTech,
   IconSupportHeadset,
 } from './TechIcons';
-import api from '../api/client';
+import api, { getMediaUrl } from '../api/client';
 import logo from '../assets/gbsg-logo.jpg';
 import './Header.css';
 
@@ -125,7 +125,7 @@ export default function Header() {
     if (n.link) navigate(n.link);
   };
 
-  const isAboutActive = ['/about', '/leadership', '/gallery'].includes(location.pathname);
+  const isAboutActive = ['/about', '/leadership', '/alumni', '/gallery'].includes(location.pathname);
   const isHubActive = ['/resources', '/community', '/news', '/blog'].some((p) =>
     location.pathname.startsWith(p)
   );
@@ -152,7 +152,7 @@ export default function Header() {
           </div>
         </Link>
 
-        {/* Header Right Actions (Language Switcher always visible + Burger) */}
+        {/* Header Right Actions (Language Switcher + Burger) */}
         <div className="site-header__top-actions">
           <LanguageSwitcher />
 
@@ -231,6 +231,21 @@ export default function Header() {
                   <div className="dropdown-item-text">
                     <strong>{t('nav.leadership')}</strong>
                     <small>Executive Committee & Representatives</small>
+                  </div>
+                </NavLink>
+
+                <NavLink
+                  to="/alumni"
+                  className={({ isActive }) =>
+                    isActive ? 'nav-dropdown__item is-active' : 'nav-dropdown__item'
+                  }
+                >
+                  <div className="dropdown-item-icon-box">
+                    <IconGraduationTech size={18} color="var(--color-star-gold)" />
+                  </div>
+                  <div className="dropdown-item-text">
+                    <strong>{t('nav.alumni')}</strong>
+                    <small>Graduates, Mentorship & Networking</small>
                   </div>
                 </NavLink>
 
@@ -410,9 +425,26 @@ export default function Header() {
                       onClick={() => setOpenDropdown((p) => (p === 'userMenu' ? null : 'userMenu'))}
                       aria-expanded={openDropdown === 'userMenu'}
                     >
-                      <span className="user-avatar-initials">
-                        {member.fullName ? member.fullName.charAt(0).toUpperCase() : 'U'}
-                      </span>
+                      {member.profileImageUrl ? (
+                        <img
+                          src={getMediaUrl(member.profileImageUrl)}
+                          alt={member.fullName}
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            border: '1.5px solid var(--color-star-gold)',
+                          }}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <span className="user-avatar-initials">
+                          {member.fullName ? member.fullName.charAt(0).toUpperCase() : 'U'}
+                        </span>
+                      )}
                       <span className="user-avatar-name">{member.fullName?.split(' ')[0]}</span>
                       <span className="chevron-arrow">▾</span>
                     </button>
@@ -527,6 +559,7 @@ export default function Header() {
                     <small className="mobile-drawer__brand-sub">Jimma University</small>
                   </div>
                 </div>
+
                 <button
                   type="button"
                   className="mobile-drawer__close-btn"
@@ -593,6 +626,20 @@ export default function Header() {
                         <div className="dropdown-item-text">
                           <strong>{t('nav.leadership')}</strong>
                           <small>Executive Committee & Representatives</small>
+                        </div>
+                      </NavLink>
+
+                      <NavLink
+                        to="/alumni"
+                        className="mobile-accordion-item"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <div className="dropdown-item-icon-box">
+                          <IconGraduationTech size={18} color="var(--color-star-gold)" />
+                        </div>
+                        <div className="dropdown-item-text">
+                          <strong>{t('nav.alumni')}</strong>
+                          <small>Graduates, Mentorship & Networking</small>
                         </div>
                       </NavLink>
 
@@ -708,9 +755,27 @@ export default function Header() {
                   {member ? (
                     <div className="mobile-user-card">
                       <div className="mobile-user-card__header">
-                        <span className="user-avatar-initials">
-                          {member.fullName ? member.fullName.charAt(0).toUpperCase() : 'U'}
-                        </span>
+                        {member.profileImageUrl ? (
+                          <img
+                            src={getMediaUrl(member.profileImageUrl)}
+                            alt={member.fullName}
+                            style={{
+                              width: 38,
+                              height: 38,
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              border: '1.5px solid var(--color-star-gold)',
+                              flexShrink: 0,
+                            }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <span className="user-avatar-initials">
+                            {member.fullName ? member.fullName.charAt(0).toUpperCase() : 'U'}
+                          </span>
+                        )}
                         <div>
                           <div className="mobile-user-name">{member.fullName}</div>
                           <div className="mobile-user-email">{member.email}</div>
