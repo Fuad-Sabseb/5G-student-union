@@ -22,6 +22,14 @@ export default function Profile() {
     homeArea: '',
     preferredLanguage: 'or',
     profileImageUrl: '',
+    isAlumni: false,
+    graduationYear: '',
+    currentOccupation: '',
+    currentCompany: '',
+    currentLocation: '',
+    linkedinUrl: '',
+    alumniBio: '',
+    willingToMentor: false,
   });
 
   const [passwordForm, setPasswordForm] = useState({
@@ -48,12 +56,22 @@ export default function Profile() {
         homeArea: member.homeArea || '',
         preferredLanguage: member.preferredLanguage || 'or',
         profileImageUrl: member.profileImageUrl || '',
+        isAlumni: Boolean(member.isAlumni),
+        graduationYear: member.graduationYear || '',
+        currentOccupation: member.currentOccupation || '',
+        currentCompany: member.currentCompany || '',
+        currentLocation: member.currentLocation || '',
+        linkedinUrl: member.linkedinUrl || '',
+        alumniBio: member.alumniBio || '',
+        willingToMentor: Boolean(member.willingToMentor),
       });
     }
   }, [member]);
 
   const handleProfileChange = (e) => {
-    setProfileForm({ ...profileForm, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    const val = type === 'checkbox' ? checked : value;
+    setProfileForm((prev) => ({ ...prev, [name]: val }));
   };
 
   const handlePasswordChange = (e) => {
@@ -64,7 +82,6 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate image format and size (max 5MB)
     if (!file.type.startsWith('image/')) {
       setProfileMsg({ type: 'error', text: 'Please select a valid image file (JPG, PNG, WebP).' });
       return;
@@ -82,7 +99,6 @@ export default function Profile() {
     setProfileMsg({ type: '', text: '' });
 
     try {
-      // 1. Upload file to server
       const res = await api.post('/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -92,13 +108,9 @@ export default function Profile() {
         throw new Error('Upload succeeded but no image URL was returned.');
       }
 
-      // 2. Update local form state immediately
       setProfileForm((prev) => ({ ...prev, profileImageUrl: uploadedUrl }));
-
-      // 3. Persist avatar change to member profile immediately
       await api.put('/auth/profile', { profileImageUrl: uploadedUrl });
 
-      // 4. Refresh global AuthContext so header & views update in real-time
       if (loadProfile) {
         await loadProfile();
       }
@@ -114,7 +126,6 @@ export default function Profile() {
       });
     } finally {
       setUploadingImage(false);
-      // Reset input value so user can upload the same file again if desired
       e.target.value = '';
     }
   };
@@ -127,12 +138,13 @@ export default function Profile() {
     try {
       await api.put('/auth/profile', {
         ...profileForm,
-        yearOfStudy: profileForm.yearOfStudy ? Number(profileForm.yearOfStudy) : undefined,
+        yearOfStudy: profileForm.isAlumni ? undefined : profileForm.yearOfStudy ? Number(profileForm.yearOfStudy) : undefined,
+        graduationYear: profileForm.isAlumni && profileForm.graduationYear ? Number(profileForm.graduationYear) : undefined,
       });
       if (loadProfile) await loadProfile();
       setProfileMsg({
         type: 'success',
-        text: t('profile_page.profile_updated') || 'Profile updated successfully!',
+        text: t('profile_page.profile_updated') || 'Personal information updated successfully!',
       });
     } catch (err) {
       setProfileMsg({
@@ -200,7 +212,6 @@ export default function Profile() {
                     src={getMediaUrl(profileForm.profileImageUrl)}
                     alt={profileForm.fullName}
                     onError={(e) => {
-                      // Fallback if image path fails to load
                       e.target.style.display = 'none';
                     }}
                   />
@@ -241,7 +252,7 @@ export default function Profile() {
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
               >
                 <IconUserTech size={15} />
-                <span>{t('profile_page.tab_profile') || 'Student Profile'}</span>
+                <span>{t('profile_page.tab_profile') || 'Personal Profile'}</span>
               </button>
               <button
                 type="button"
@@ -259,9 +270,9 @@ export default function Profile() {
           <div className="card profile-content">
             {activeTab === 'profile' ? (
               <div>
-                <h2>{t('profile_page.student_details') || 'Student Information'}</h2>
+                <h2>{t('profile_page.student_details') || 'Personal Information'}</h2>
                 <p className="form-notice">
-                  {t('profile_page.details_help') || 'Keep your university campus and department updated so the union can best support you.'}
+                  {t('profile_page.details_help') || 'Keep your university campus, year of study, and contact details updated so the union can best support you.'}
                 </p>
 
                 {profileMsg.text && (
@@ -269,6 +280,29 @@ export default function Profile() {
                     {profileMsg.text}
                   </p>
                 )}
+
+                {/* Member Type Toggle */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--color-gibe-dusk)' }}>
+                    {t('membership.member_type') || 'Member Category'}
+                  </label>
+                  <div className="auth-tabs" role="tablist">
+                    <button
+                      type="button"
+                      className={`auth-tab ${!profileForm.isAlumni ? 'is-active' : ''}`}
+                      onClick={() => setProfileForm((prev) => ({ ...prev, isAlumni: false }))}
+                    >
+                      🎓 {t('membership.type_student') || 'Current Student'}
+                    </button>
+                    <button
+                      type="button"
+                      className={`auth-tab ${profileForm.isAlumni ? 'is-active' : ''}`}
+                      onClick={() => setProfileForm((prev) => ({ ...prev, isAlumni: true }))}
+                    >
+                      💼 {t('membership.type_alumni') || 'Alumnus / Graduate'}
+                    </button>
+                  </div>
+                </div>
 
                 <form onSubmit={handleProfileSubmit} className="auth-form">
                   <div className="auth-form__grid">
@@ -292,58 +326,143 @@ export default function Profile() {
                       />
                     </label>
 
-                    <label>
-                      {t('membership.student_id')}
-                      <input
-                        name="studentId"
-                        value={profileForm.studentId}
-                        onChange={handleProfileChange}
-                        placeholder="e.g. R/1234/14"
-                      />
-                    </label>
+                    {/* Student vs Alumni Fields */}
+                    {!profileForm.isAlumni ? (
+                      <>
+                        <label>
+                          {t('membership.student_id')}
+                          <input
+                            name="studentId"
+                            value={profileForm.studentId}
+                            onChange={handleProfileChange}
+                            placeholder="e.g. R/1234/14"
+                          />
+                        </label>
 
-                    <label>
-                      {t('membership.campus')}
-                      <input
-                        name="campus"
-                        value={profileForm.campus}
-                        onChange={handleProfileChange}
-                        placeholder="e.g. Main Campus"
-                      />
-                    </label>
+                        <label>
+                          {t('membership.campus')}
+                          <input
+                            name="campus"
+                            value={profileForm.campus}
+                            onChange={handleProfileChange}
+                            placeholder="e.g. Jimma University Main Campus"
+                          />
+                        </label>
 
-                    <label>
-                      {t('membership.department')}
-                      <input
-                        name="department"
-                        value={profileForm.department}
-                        onChange={handleProfileChange}
-                        placeholder="e.g. Software Engineering"
-                      />
-                    </label>
+                        <label>
+                          {t('membership.department')}
+                          <input
+                            name="department"
+                            value={profileForm.department}
+                            onChange={handleProfileChange}
+                            placeholder="e.g. Computer Science / Medicine"
+                          />
+                        </label>
 
-                    <label>
-                      {t('membership.year_of_study')}
-                      <input
-                        type="number"
-                        min="1"
-                        max="7"
-                        name="yearOfStudy"
-                        value={profileForm.yearOfStudy}
-                        onChange={handleProfileChange}
-                        placeholder="1 - 7"
-                      />
-                    </label>
+                        <label>
+                          {t('membership.year_of_study')}
+                          <input
+                            type="number"
+                            min="1"
+                            max="7"
+                            name="yearOfStudy"
+                            value={profileForm.yearOfStudy}
+                            onChange={handleProfileChange}
+                            placeholder="1 - 7"
+                          />
+                        </label>
 
-                    <label>
-                      {t('membership.home_area')}
-                      <input
-                        name="homeArea"
-                        value={profileForm.homeArea}
-                        onChange={handleProfileChange}
-                        placeholder="Kebele / Woreda in Shanan Gibe"
-                      />
-                    </label>
+                        <label>
+                          {t('membership.home_area')}
+                          <input
+                            name="homeArea"
+                            value={profileForm.homeArea}
+                            onChange={handleProfileChange}
+                            placeholder="Kebele / Woreda in Shanan Gibe"
+                          />
+                        </label>
+                      </>
+                    ) : (
+                      <>
+                        <label>
+                          {t('membership.graduation_year')}
+                          <input
+                            type="number"
+                            name="graduationYear"
+                            min={1980}
+                            max={2050}
+                            value={profileForm.graduationYear}
+                            onChange={handleProfileChange}
+                            placeholder="e.g. 2023"
+                          />
+                        </label>
+
+                        <label>
+                          {t('membership.current_occupation')}
+                          <input
+                            name="currentOccupation"
+                            value={profileForm.currentOccupation}
+                            onChange={handleProfileChange}
+                            placeholder="e.g. Software Engineer / Physician"
+                          />
+                        </label>
+
+                        <label>
+                          {t('membership.current_company')}
+                          <input
+                            name="currentCompany"
+                            value={profileForm.currentCompany}
+                            onChange={handleProfileChange}
+                            placeholder="e.g. Ethio Telecom"
+                          />
+                        </label>
+
+                        <label>
+                          {t('membership.current_location')}
+                          <input
+                            name="currentLocation"
+                            value={profileForm.currentLocation}
+                            onChange={handleProfileChange}
+                            placeholder="e.g. Addis Ababa, Ethiopia"
+                          />
+                        </label>
+
+                        <label className="span-2">
+                          {t('membership.linkedin_url')}
+                          <input
+                            type="url"
+                            name="linkedinUrl"
+                            value={profileForm.linkedinUrl}
+                            onChange={handleProfileChange}
+                            placeholder="https://linkedin.com/in/username"
+                          />
+                        </label>
+
+                        <label className="span-2">
+                          {t('membership.alumni_bio')}
+                          <textarea
+                            name="alumniBio"
+                            rows={3}
+                            value={profileForm.alumniBio}
+                            onChange={handleProfileChange}
+                            placeholder="Share your current work or advice for union students..."
+                          />
+                        </label>
+
+                        <label className="span-2" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer', marginTop: '0.25rem' }}>
+                          <input
+                            type="checkbox"
+                            name="willingToMentor"
+                            checked={profileForm.willingToMentor}
+                            onChange={handleProfileChange}
+                            style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                          />
+                          <span style={{ fontSize: '0.9rem', color: 'var(--color-gibe-dusk)', fontWeight: 600 }}>
+                            ⭐ {t('membership.willing_to_mentor') || 'Willing to mentor union students'}
+                          </span>
+                        </label>
+                      </>
+                    )}
 
                     <label className="span-2">
                       {t('membership.preferred_language')}
