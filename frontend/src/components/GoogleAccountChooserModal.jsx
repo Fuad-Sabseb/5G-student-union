@@ -381,28 +381,29 @@ export default function GoogleAccountChooserModal({ isOpen, onClose, onSelectAcc
                 <p className="google-consent-help-text">
                   To make changes at any time, go to your <strong>Google Account</strong>.
                 </p>
-                <p className="google-consent-help-text" style={{ marginBottom: '1.5rem' }}>
+                <p className="google-consent-help-text">
                   Learn more about <a href="#learn" onClick={(e) => e.preventDefault()}>Sign in with Google</a>.
                 </p>
-
-                <div className="google-oauth-actions">
-                  <button
-                    type="button"
-                    className="google-btn-pill-secondary"
-                    onClick={() => setModalStep('choose')}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="google-btn-pill-primary"
-                    onClick={handleAcceptTermsAndContinue}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Connecting...' : 'Continue'}
-                  </button>
-                </div>
               </div>
+            </div>
+
+            {/* Fixed Action Bar for Step 2 */}
+            <div className="google-oauth-actions-bar">
+              <button
+                type="button"
+                className="google-btn-pill-secondary"
+                onClick={() => setModalStep('choose')}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="google-btn-pill-primary"
+                onClick={handleAcceptTermsAndContinue}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Connecting...' : 'Continue'}
+              </button>
             </div>
           </div>
         )}
