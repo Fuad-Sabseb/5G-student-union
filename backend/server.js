@@ -108,6 +108,17 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n❌ Error: Port ${PORT} is already in use by a background Node process.`);
+    console.error(`👉 Run 'lsof -ti:${PORT} | xargs kill -9' to free port ${PORT}.\n`);
+    process.exit(1);
+  } else {
+    throw err;
+  }
 });
