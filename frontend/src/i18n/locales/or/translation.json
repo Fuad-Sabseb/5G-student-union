@@ -93,6 +93,11 @@
     "connect_with_us": "Nu Hordofaa",
     "social_tagline": "Oduu fi beeksisoota haarawaa argachuuf toora miidiyaa hawaasaa keenya hordofaa."
   },
+  "partners": {
+    "eyebrow": "Tumsitoota fi Hattoota",
+    "title": "Hawaasa Keenya Wajjin Wal-Harkaa Fuudhiinsaan Hojjechuu",
+    "subtitle": "Dhaabbilee mootummaa fi hawaasaa Gamtaa Barattoota Shanan Gibee wajjin hojjetan."
+  },
   "common": {
     "coming_soon": "Kutaan kun marsaa itti aanutti dhiyaata.",
     "loading": "Fe'aa jira...",
