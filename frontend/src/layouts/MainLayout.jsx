@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import PartnersMarquee from '../components/PartnersMarquee';
 import TechNetworkCanvas from '../components/TechNetworkCanvas';
 import AIAssistantWidget from '../components/AIAssistantWidget';
 
@@ -21,6 +22,7 @@ export default function MainLayout() {
       <main style={{ position: 'relative', zIndex: 1 }}>
         <Outlet />
       </main>
+      <PartnersMarquee />
       <Footer />
 
       {/* Gemini AI Student Support Assistant Widget */}
