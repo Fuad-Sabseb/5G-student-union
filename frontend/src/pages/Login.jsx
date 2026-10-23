@@ -56,13 +56,21 @@ export default function Login() {
   };
 
   const handleGoogleSuccess = async (idToken) => {
+    console.log('Google login success, idToken received:', idToken ? 'YES' : 'NO');
+    console.log('idToken length:', idToken?.length);
+    console.log('idToken starts with:', idToken?.substring(0, 20));
+    
     setError('');
     setSubmitting(true);
     try {
+      console.log('Calling backend /auth/google...');
       await googleLogin(idToken);
+      console.log('Backend response successful');
       const destination = location.state?.from?.pathname || '/';
       navigate(destination, { replace: true });
     } catch (err) {
+      console.error('Backend error:', err);
+      console.error('Error response:', err.response?.data);
       setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
     } finally {
       setSubmitting(false);
