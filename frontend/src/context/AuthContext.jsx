@@ -49,17 +49,10 @@ export function AuthProvider({ children }) {
   };
 
   const googleLogin = async (idToken, additionalData = {}) => {
-    console.log('googleLogin called');
-    console.log('idToken:', idToken ? 'present' : 'missing');
-    console.log('additionalData:', additionalData);
-    
-    const payload = { 
+    const res = await api.post('/auth/google', { 
       idToken,
       ...additionalData 
-    };
-    console.log('Sending to /auth/google:', payload);
-    
-    const res = await api.post('/auth/google', payload);
+    });
     localStorage.setItem('gbsg_token', res.data.token);
     setMember(res.data);
     return res.data;

@@ -382,35 +382,25 @@ function formatNameFromEmail(email) {
 const googleAuth = asyncHandler(async (req, res) => {
   const { idToken, preferredLanguage, isAlumni, graduationYear, currentOccupation, currentCompany, currentLocation, linkedinUrl, alumniBio, willingToMentor } = req.body;
 
-  console.log('Google auth request received');
-  console.log('Request body keys:', Object.keys(req.body));
-  console.log('idToken present:', !!idToken);
-  console.log('GOOGLE_CLIENT_ID configured:', !!process.env.GOOGLE_CLIENT_ID);
-
   if (!idToken) {
-    console.error('No idToken provided in request');
     res.status(400);
     throw new Error('Google ID token is required');
   }
 
   if (!process.env.GOOGLE_CLIENT_ID) {
-    console.error('GOOGLE_CLIENT_ID environment variable not set');
     res.status(500);
     throw new Error('Google OAuth is not configured on the server. Please contact the administrator.');
   }
 
   let ticket;
   try {
-    console.log('Attempting to verify ID token...');
     // Verify the ID token with Google's public keys
     ticket = await googleClient.verifyIdToken({
       idToken,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-    console.log('Token verification successful');
   } catch (error) {
     console.error('Google token verification failed:', error.message);
-    console.error('Error details:', error);
     res.status(401);
     throw new Error('Invalid Google ID token. Please try signing in again.');
   }
