@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import api, { getMediaUrl } from '../api/client';
+import { SkeletonNewsGrid } from '../components/LoadingSkeleton';
+import EmptyState from '../components/EmptyState';
 import '../styles/listing.css';
 import './News.css';
 
@@ -45,14 +47,30 @@ export default function NewsEvents() {
       <section className="section">
         <div className="container">
           {loading ? (
-            <p>{t('common.loading')}</p>
+            <SkeletonNewsGrid count={6} />
           ) : items.length === 0 ? (
-            <p>{t('news_page.empty')}</p>
+            <EmptyState
+              icon="📰"
+              title={
+                filter === 'all'
+                  ? t('news_page.empty') || 'No announcements yet'
+                  : filter === 'event'
+                  ? 'No upcoming events'
+                  : 'No news posts yet'
+              }
+              description={
+                filter === 'all'
+                  ? 'Check back soon for union updates, event announcements, and important news.'
+                  : filter === 'event'
+                  ? 'No events are currently scheduled. Check back later for upcoming gatherings and activities.'
+                  : 'No news has been posted yet. Stay tuned for updates from the union.'
+              }
+            />
           ) : (
             <div className="news-grid">
               {items.map((item) => (
                 <NavLink to={`/news/${item._id}`} className="card news-card" key={item._id}>
-                  {item.imageUrl && <img src={getMediaUrl(item.imageUrl)} alt="" className="news-card__image" />}
+                  {item.imageUrl && <img src={getMediaUrl(item.imageUrl)} alt="" className="news-card__image" loading="lazy" />}
                   <span className={`news-card__type news-card__type--${item.type}`}>
                     {t(`news_page.tab_${item.type}`)}
                   </span>

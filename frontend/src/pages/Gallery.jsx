@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import api, { getMediaUrl } from '../api/client';
+import { SkeletonGalleryGrid } from '../components/LoadingSkeleton';
+import EmptyState from '../components/EmptyState';
 import '../styles/listing.css';
 import './Gallery.css';
 
@@ -60,9 +62,21 @@ export default function Gallery() {
       <section className="section">
         <div className="container">
           {loading ? (
-            <p>{t('common.loading')}</p>
+            <SkeletonGalleryGrid count={9} />
           ) : items.length === 0 ? (
-            <p>{t('gallery_page.empty')}</p>
+            <EmptyState
+              icon="📸"
+              title={
+                activeAlbum
+                  ? `No photos in "${activeAlbum}"`
+                  : t('gallery_page.empty') || 'No photos yet'
+              }
+              description={
+                activeAlbum
+                  ? 'This album is empty. Check back later for new photos from union events.'
+                  : 'Our gallery is currently empty. Check back soon for photos from union events, gatherings, and campus life.'
+              }
+            />
           ) : (
             <div className="gallery-grid">
               {items.map((item) => (
@@ -70,6 +84,9 @@ export default function Gallery() {
                   <img
                     src={getMediaUrl(item.imageUrl)}
                     alt={(lang === 'or' ? item.caption_or : item.caption_en) || item.album}
+                    loading="lazy"
+                    width="400"
+                    height="400"
                   />
                   {(item.caption_en || item.caption_or) && (
                     <figcaption>{lang === 'or' ? item.caption_or : item.caption_en}</figcaption>

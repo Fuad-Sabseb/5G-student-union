@@ -6,10 +6,14 @@ import TechNetworkCanvas from '../components/TechNetworkCanvas';
 import AIAssistantWidget from '../components/AIAssistantWidget';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
 import IOSInstallPrompt from '../components/IOSInstallPrompt';
+import SkipLink from '../components/SkipLink';
 
 export default function MainLayout() {
   return (
     <div className="app-shell">
+      {/* Accessibility: Skip to main content */}
+      <SkipLink />
+
       {/* Sophisticated 3D Digital Technology Network Canvas */}
       <TechNetworkCanvas />
 
@@ -21,7 +25,7 @@ export default function MainLayout() {
       </div>
 
       <Header />
-      <main style={{ position: 'relative', zIndex: 1 }}>
+      <main id="main-content" style={{ position: 'relative', zIndex: 1 }}>
         <Outlet />
       </main>
       <PartnersMarquee />
