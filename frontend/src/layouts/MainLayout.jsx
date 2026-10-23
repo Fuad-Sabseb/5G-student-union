@@ -4,6 +4,8 @@ import Footer from '../components/Footer';
 import PartnersMarquee from '../components/PartnersMarquee';
 import TechNetworkCanvas from '../components/TechNetworkCanvas';
 import AIAssistantWidget from '../components/AIAssistantWidget';
+import PWAInstallPrompt from '../components/PWAInstallPrompt';
+import IOSInstallPrompt from '../components/IOSInstallPrompt';
 
 export default function MainLayout() {
   return (
@@ -27,6 +29,10 @@ export default function MainLayout() {
 
       {/* Gemini AI Student Support Assistant Widget */}
       <AIAssistantWidget />
+
+      {/* PWA Install Prompts */}
+      <PWAInstallPrompt />
+      <IOSInstallPrompt />
     </div>
   );
 }

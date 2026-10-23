@@ -27,6 +27,7 @@ import Support from './pages/Support';
 import SupportDetail from './pages/SupportDetail';
 import Dashboard from './pages/Dashboard';
 import Alumni from './pages/Alumni';
+import Offline from './pages/Offline';
 
 import AdminMembers from './pages/admin/AdminMembers';
 import AdminAlumni from './pages/admin/AdminAlumni';
@@ -56,6 +57,7 @@ export default function App() {
               <Route path="/membership" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="/offline" element={<Offline />} />
 
               {/* Protected browsing routes — require registration / login before browsing */}
               <Route

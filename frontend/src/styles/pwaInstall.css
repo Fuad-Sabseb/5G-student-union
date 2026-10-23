@@ -1,0 +1,239 @@
+/* ============================================
+   PWA Install Prompt Styles
+   ============================================ */
+
+/* Android/Desktop Install Banner */
+.pwa-install-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: var(--color-white);
+  border-top: 3px solid var(--color-star-gold);
+  box-shadow: 0 -4px 20px rgba(22, 50, 79, 0.15);
+  padding: 1rem 1.25rem;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.pwa-install-banner__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.pwa-install-banner__close:hover {
+  color: var(--color-ink);
+}
+
+.pwa-install-banner__content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pwa-install-banner__icon {
+  flex-shrink: 0;
+}
+
+.pwa-install-banner__icon img {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(22, 50, 79, 0.12);
+}
+
+.pwa-install-banner__text h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.1rem;
+  color: var(--color-gibe-dusk);
+}
+
+.pwa-install-banner__text p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-ink-soft);
+}
+
+.pwa-install-banner__actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* iOS Install Prompt Modal */
+.pwa-ios-prompt {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 32px rgba(22, 50, 79, 0.2);
+  padding: 1.5rem;
+  max-width: 400px;
+  margin: 0 auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+.pwa-ios-prompt__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.pwa-ios-prompt__close:hover {
+  color: var(--color-ink);
+}
+
+.pwa-ios-prompt__content {
+  text-align: center;
+}
+
+.pwa-ios-prompt__icon {
+  margin: 0 auto 1rem;
+  display: inline-block;
+}
+
+.pwa-ios-prompt__icon img {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(22, 50, 79, 0.12);
+}
+
+.pwa-ios-prompt h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  color: var(--color-gibe-dusk);
+}
+
+.pwa-ios-prompt__desc {
+  margin: 0 0 1.5rem 0;
+  font-size: 0.95rem;
+  color: var(--color-ink-soft);
+}
+
+.pwa-ios-prompt__steps {
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.pwa-ios-step {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--color-cream);
+  border-radius: var(--radius-sm);
+}
+
+.pwa-ios-step:last-child {
+  margin-bottom: 0;
+}
+
+.pwa-ios-step__number {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: var(--color-star-gold);
+  color: var(--color-gibe-dusk);
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.pwa-ios-step p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-ink);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.pwa-ios-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-star-gold);
+  margin: 0 0.15rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .pwa-install-banner {
+    padding: 1rem;
+  }
+
+  .pwa-install-banner__content {
+    gap: 0.75rem;
+  }
+
+  .pwa-install-banner__icon img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .pwa-install-banner__text h3 {
+    font-size: 1rem;
+  }
+
+  .pwa-install-banner__text p {
+    font-size: 0.85rem;
+  }
+
+  .pwa-install-banner__actions {
+    flex-direction: column;
+  }
+
+  .pwa-ios-prompt {
+    bottom: 0.5rem;
+    left: 0.5rem;
+    right: 0.5rem;
+    padding: 1.25rem;
+  }
+}
+
+/* Tablet landscape and larger */
+@media (min-width: 768px) {
+  .pwa-install-banner {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    max-width: 600px;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+
+  .pwa-ios-prompt {
+    max-width: 420px;
+  }
+}

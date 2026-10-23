@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - 5G Union</title>
+    <style>
+        :root {
+            --color-gibe-dusk: #16324f;
+            --color-star-gold: #d9a441;
+            --color-cream: #f3eee1;
+            --color-ink: #211e1a;
+            --color-ink-soft: #514c43;
+            --color-white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--color-cream);
+            color: var(--color-ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .offline-container {
+            background: var(--color-white);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(22, 50, 79, 0.15);
+            padding: 2rem;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .offline-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1.5rem;
+            opacity: 0.6;
+        }
+
+        h1 {
+            color: var(--color-gibe-dusk);
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            color: var(--color-ink-soft);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            background: var(--color-star-gold);
+            color: var(--color-gibe-dusk);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #e6b75c;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-star-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <svg class="offline-icon" viewBox="0 0 120 120" fill="none">
+            <circle cx="60" cy="60" r="58" stroke="#e8e0cc" stroke-width="4"/>
+            <path d="M30 60 Q45 40, 60 40 T90 60" stroke="#514c43" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.3"/>
+            <path d="M40 70 Q50 60, 60 60 T80 70" stroke="#514c43" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.5"/>
+            <line x1="20" y1="20" x2="100" y2="100" stroke="#d9a441" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+
+        <span class="eyebrow">Connection Lost</span>
+        <h1>You're Offline</h1>
+        <p>
+            It looks like you've lost your internet connection. 
+            Please check your network and try again.
+        </p>
+        <button class="btn" onclick="window.location.reload()">
+            Retry Connection
+        </button>
+    </div>
+
+    <script>
+        // Auto-reload when connection is restored
+        window.addEventListener('online', () => {
+            console.log('Connection restored');
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>

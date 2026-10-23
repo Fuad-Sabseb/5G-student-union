@@ -1,0 +1,55 @@
+{
+  "name": "Shanan Gibe Student Union",
+  "short_name": "5G Union",
+  "description": "Student union platform for Shanan Gibe at Jimma University — uniting students through mentorship, culture, and shared purpose.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#16324f",
+  "background_color": "#f3eee1",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["education", "social"],
+  "shortcuts": [
+    {
+      "name": "News & Events",
+      "short_name": "News",
+      "description": "View latest announcements and events",
+      "url": "/news",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Gallery",
+      "short_name": "Gallery",
+      "description": "Browse photo gallery",
+      "url": "/gallery",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Community Forum",
+      "short_name": "Forum",
+      "description": "Join community discussions",
+      "url": "/community",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

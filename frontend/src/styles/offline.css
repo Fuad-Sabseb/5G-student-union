@@ -1,0 +1,117 @@
+/* ============================================
+   Offline Page Styles
+   ============================================ */
+
+.offline-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-cream);
+  padding: 2rem 1rem;
+}
+
+.offline-card {
+  max-width: 560px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.offline-icon {
+  margin: 0 auto 1.5rem;
+  display: inline-block;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.offline-card h1 {
+  margin: 0.5rem 0 1rem;
+  color: var(--color-gibe-dusk);
+}
+
+.offline-message {
+  font-size: 1.05rem;
+  color: var(--color-ink-soft);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.offline-info {
+  text-align: left;
+  background: var(--color-cream);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.offline-info h3 {
+  font-size: 1rem;
+  margin: 0 0 0.75rem 0;
+  color: var(--color-gibe-dusk);
+}
+
+.offline-info h3:not(:first-child) {
+  margin-top: 1.5rem;
+}
+
+.offline-info ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style: none;
+}
+
+.offline-info ul li {
+  position: relative;
+  margin-bottom: 0.5rem;
+  color: var(--color-ink);
+  font-size: 0.95rem;
+}
+
+.offline-info ul li:last-child {
+  margin-bottom: 0;
+}
+
+.offline-info ul li::before {
+  content: '•';
+  position: absolute;
+  left: -1.25rem;
+  color: var(--color-star-gold);
+  font-weight: bold;
+}
+
+.offline-footer {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--color-ink-soft);
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .offline-page {
+    padding: 1.5rem 1rem;
+  }
+
+  .offline-icon svg {
+    width: 90px;
+    height: 90px;
+  }
+
+  .offline-card h1 {
+    font-size: 1.75rem;
+  }
+
+  .offline-info {
+    padding: 1.25rem;
+  }
+}
