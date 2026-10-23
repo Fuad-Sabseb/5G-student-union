@@ -1,0 +1,26 @@
+{
+  "gallery": [
+    {
+      "_id": "6a7f7d6dde4557c1a69116bd",
+      "imageUrl": "/uploads/1786740077083-956448741.jpg",
+      "caption_en": "Dr. Nabila Sharif is an outstanding medical graduate from Jimma University who achieved the highest score in her medical faculty with a cumulative GPA of 3.90 out of 4.0 in Doctor of Dental Medicine (DMD) in June 2026",
+      "caption_or": "",
+      "album": "General"
+    }
+  ],
+  "announcements": [],
+  "blog": [],
+  "members": [
+    {
+      "_id": "6a7f678f669b094eff0da4cb",
+      "profileImageUrl": "/uploads/1791725667721-31943701.jpg",
+      "fullName": "Fahi Official"
+    },
+    {
+      "_id": "6aa853aa0877e702ca5790dd",
+      "profileImageUrl": "/uploads/1790864298004-659128741.png",
+      "fullName": "Fuad Sabseb"
+    }
+  ],
+  "timestamp": "2026-10-23T18:42:45.198Z"
+}
