@@ -48,8 +48,11 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
-  const googleLogin = async (payload) => {
-    const res = await api.post('/auth/google', payload);
+  const googleLogin = async (idToken, additionalData = {}) => {
+    const res = await api.post('/auth/google', { 
+      idToken,
+      ...additionalData 
+    });
     localStorage.setItem('gbsg_token', res.data.token);
     setMember(res.data);
     return res.data;

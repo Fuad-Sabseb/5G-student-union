@@ -10,12 +10,19 @@ A full-stack MERN web application built for the Shanan Gibe Student Union at Jim
 ## ✨ Features
 
 * **Bilingual Support:** Full dynamic translation toggle between English and Afaan Oromo.
-* **Member Authentication & Roles:** Secure JWT authentication with role-based permissions (`Member`, `Exec`, `Admin`).
+* **Secure Authentication:** JWT authentication with Google OAuth 2.0 Sign-In
+* **Member Authentication & Roles:** Role-based permissions (`Member`, `Exec`, `Admin`).
 * **Announcements (News & Events):** Post bilingual news updates and upcoming events with member comment threads.
 * **Gallery:** Photo albums with bilingual captions.
 * **Blog & Articles:** Member-authored articles with language filtering and moderation controls.
 * **Support System:** Ticketing system for mentorship, orientation, conflict resolution, and general student aid.
 * **Admin Dashboard:** Manage memberships, approve registrations, manage content, and assign support tickets.
+
+---
+
+## 🔐 Security Notice
+
+**Google OAuth 2.0 has been implemented with proper cryptographic verification.** See [`GOOGLE_OAUTH_SETUP.md`](./GOOGLE_OAUTH_SETUP.md) for configuration instructions.
 
 ---
 

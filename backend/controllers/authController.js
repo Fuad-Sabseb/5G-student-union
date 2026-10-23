@@ -208,6 +208,9 @@ const getProfile = asyncHandler(async (req, res) => {
 });
 
 const crypto = require('crypto');
+const { OAuth2Client } = require('google-auth-library');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // @desc    Update logged-in member's own profile
 // @route   PUT /api/auth/profile
@@ -373,43 +376,89 @@ function formatNameFromEmail(email) {
     .join(' ');
 }
 
-// @desc    Register or Login via Google (Gmail)
+// @desc    Register or Login via Google OAuth (Secure ID Token Verification)
 // @route   POST /api/auth/google
 // @access  Public
 const googleAuth = asyncHandler(async (req, res) => {
-  const {
-    email,
-    fullName,
-    googleId,
-    profileImageUrl,
-    phone,
-    studentId,
-    campus,
-    department,
-    yearOfStudy,
-    homeArea,
-    preferredLanguage,
-  } = req.body;
+  const { idToken, preferredLanguage, isAlumni, graduationYear, currentOccupation, currentCompany, currentLocation, linkedinUrl, alumniBio, willingToMentor } = req.body;
 
-  if (!email) {
+  if (!idToken) {
     res.status(400);
-    throw new Error('Email is required for Google authentication');
+    throw new Error('Google ID token is required');
+  }
+
+  if (!process.env.GOOGLE_CLIENT_ID) {
+    res.status(500);
+    throw new Error('Google OAuth is not configured on the server. Please contact the administrator.');
+  }
+
+  let ticket;
+  try {
+    // Verify the ID token with Google's public keys
+    ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+  } catch (error) {
+    console.error('Google token verification failed:', error.message);
+    res.status(401);
+    throw new Error('Invalid Google ID token. Please try signing in again.');
+  }
+
+  const payload = ticket.getPayload();
+  
+  // Extract verified claims from the ID token
+  const {
+    sub: googleSub,        // Google's stable user identifier
+    email,                 // Verified email address
+    name: fullName,        // User's full name
+    picture: profileImageUrl, // Profile picture URL
+    email_verified: emailVerified,
+  } = payload;
+
+  if (!emailVerified) {
+    res.status(400);
+    throw new Error('Google email is not verified. Please verify your email with Google first.');
   }
 
   const normalizedEmail = email.toLowerCase();
+
+  // Check if member exists by googleSub (preferred) or email (fallback for migration)
   let member = await Member.findOne({
-    $or: [{ email: normalizedEmail }, ...(googleId ? [{ googleId }] : [])],
+    $or: [
+      { googleSub },
+      { email: normalizedEmail },
+    ],
   });
 
   if (member) {
-    // Existing member logging in or linking Google
-    if (googleId && !member.googleId) {
-      member.googleId = googleId;
+    // Existing member - update Google authentication fields
+    let updated = false;
+
+    if (!member.googleSub && googleSub) {
+      member.googleSub = googleSub;
+      updated = true;
     }
+
+    // Migrate legacy googleId to googleSub if needed
+    if (member.googleId && !member.googleSub) {
+      member.googleSub = googleSub;
+      updated = true;
+    }
+
     if (profileImageUrl && !member.profileImageUrl) {
       member.profileImageUrl = profileImageUrl;
+      updated = true;
     }
-    await member.save();
+
+    if (fullName && (!member.fullName || member.fullName === formatNameFromEmail(member.email))) {
+      member.fullName = fullName;
+      updated = true;
+    }
+
+    if (updated) {
+      await member.save();
+    }
 
     res.json({
       _id: member._id,
@@ -419,24 +468,29 @@ const googleAuth = asyncHandler(async (req, res) => {
       membershipStatus: member.membershipStatus,
       preferredLanguage: member.preferredLanguage,
       profileImageUrl: member.profileImageUrl,
+      isAlumni: member.isAlumni,
       token: generateToken(member._id, member.role),
     });
   } else {
-    // New member registration via Google — auto-extract first & last name from Gmail
+    // New member registration via Google
     const derivedName = fullName && fullName.trim() !== '' ? fullName : formatNameFromEmail(normalizedEmail);
 
     member = await Member.create({
       fullName: derivedName,
       email: normalizedEmail,
-      googleId: googleId || `google_${Date.now()}`,
+      googleSub,
+      googleId: `google_${googleSub}`, // Legacy field for backward compatibility
       profileImageUrl: profileImageUrl || '',
-      phone: phone || '',
-      studentId: studentId || '',
-      campus: campus || '',
-      department: department || '',
-      yearOfStudy: yearOfStudy ? Number(yearOfStudy) : undefined,
-      homeArea: homeArea || '',
       preferredLanguage: preferredLanguage || 'or',
+      isAlumni: Boolean(isAlumni),
+      graduationYear: graduationYear ? Number(graduationYear) : undefined,
+      currentOccupation: currentOccupation || '',
+      currentCompany: currentCompany || '',
+      currentLocation: currentLocation || '',
+      linkedinUrl: linkedinUrl || '',
+      alumniBio: alumniBio || '',
+      willingToMentor: Boolean(willingToMentor),
+      isVerified: true, // Google-verified email
     });
 
     res.status(201).json({
@@ -447,6 +501,7 @@ const googleAuth = asyncHandler(async (req, res) => {
       membershipStatus: member.membershipStatus,
       preferredLanguage: member.preferredLanguage,
       profileImageUrl: member.profileImageUrl,
+      isAlumni: member.isAlumni,
       token: generateToken(member._id, member.role),
     });
   }

@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import MainLayout from './layouts/MainLayout';
 import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -37,9 +38,16 @@ import AdminSupport from './pages/admin/AdminSupport';
 import AdminSupportDetail from './pages/admin/AdminSupportDetail';
 
 export default function App() {
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+  if (!googleClientId) {
+    console.warn('VITE_GOOGLE_CLIENT_ID is not configured. Google Sign-In will not work.');
+  }
+
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <GoogleOAuthProvider clientId={googleClientId || ''}>
+      <AuthProvider>
+        <BrowserRouter>
           <Routes>
             <Route element={<MainLayout />}>
               {/* Public authentication routes */}
@@ -214,5 +222,6 @@ export default function App() {
           </Routes>
         </BrowserRouter>
       </AuthProvider>
+    </GoogleOAuthProvider>
   );
 }

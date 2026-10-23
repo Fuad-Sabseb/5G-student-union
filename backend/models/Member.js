@@ -31,6 +31,17 @@ const memberSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: null,
+      // Legacy field - kept for backward compatibility with existing accounts
+      // New Google OAuth accounts should use googleSub
+    },
+    googleSub: {
+      type: String,
+      trim: true,
+      default: null,
+      unique: true,
+      sparse: true,
+      index: true,
+      // Google's stable user identifier from verified ID tokens
     },
     phone: {
       type: String,

@@ -2,18 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import GoogleAccountChooserModal from '../components/GoogleAccountChooserModal';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 import { IconShieldLock } from '../components/TechIcons';
 import '../styles/authForm.css';
-
-const GoogleIcon = () => (
-  <svg className="google-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-  </svg>
-);
 
 export function extractNameFromGmail(email) {
   if (!email || !email.includes('@')) return '';
@@ -38,7 +29,6 @@ export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [googleChooserOpen, setGoogleChooserOpen] = useState(false);
 
   // If already logged in, redirect to intended target or home
   useEffect(() => {
@@ -65,12 +55,11 @@ export default function Login() {
     }
   };
 
-  const handleGoogleAccountSelected = async (googlePayload) => {
+  const handleGoogleSuccess = async (idToken) => {
     setError('');
     setSubmitting(true);
     try {
-      await googleLogin(googlePayload);
-      setGoogleChooserOpen(false);
+      await googleLogin(idToken);
       const destination = location.state?.from?.pathname || '/';
       navigate(destination, { replace: true });
     } catch (err) {
@@ -78,6 +67,11 @@ export default function Login() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleGoogleError = (error) => {
+    console.error('Google login error:', error);
+    setError('Google sign-in failed. Please try again or use email/password login.');
   };
 
   const isGatedNotice = location.state?.from;
@@ -148,30 +142,19 @@ export default function Login() {
             <span>{t('auth.or_with_google')}</span>
           </div>
 
-          {/* Google Sign-in Trigger at Bottom */}
-          <button
-            type="button"
-            className="btn btn--google"
-            onClick={() => setGoogleChooserOpen(true)}
+          {/* Secure Google Sign-in */}
+          <GoogleLoginButton
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            buttonText={t('auth.continue_google')}
             disabled={submitting}
-          >
-            <GoogleIcon />
-            <span>{t('auth.continue_google')}</span>
-          </button>
+          />
 
           <p className="auth-card__footer">
             {t('auth.no_account')} <NavLink to="/register">{t('auth.register_link')}</NavLink>
           </p>
         </div>
       </div>
-
-      {/* Authentic Google Account Chooser Modal */}
-      <GoogleAccountChooserModal
-        isOpen={googleChooserOpen}
-        onClose={() => setGoogleChooserOpen(false)}
-        onSelectAccount={handleGoogleAccountSelected}
-        isLoading={submitting}
-      />
     </section>
   );
 }
