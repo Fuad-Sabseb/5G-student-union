@@ -59,23 +59,11 @@ export default function App() {
               <Route path="/reset-password/:token" element={<ResetPassword />} />
               <Route path="/offline" element={<Offline />} />
 
+              {/* Public pages - accessible to anyone */}
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+
               {/* Protected browsing routes — require registration / login before browsing */}
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Home />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/about"
-                element={
-                  <ProtectedRoute>
-                    <About />
-                  </ProtectedRoute>
-                }
-              />
               <Route
                 path="/leadership"
                 element={
