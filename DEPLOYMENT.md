@@ -34,16 +34,38 @@ Any Node host works (Render, Railway, Fly.io). Render's free tier is a solid def
    SMTP_EMAIL=<your Gmail address>
    SMTP_PASSWORD=<your Gmail app password>
    GEMINI_API_KEY=<your Gemini API key (optional)>
+   
+   # REQUIRED: Cloudinary credentials (for persistent image storage)
+   CLOUDINARY_CLOUD_NAME=<your Cloudinary cloud name>
+   CLOUDINARY_API_KEY=<your Cloudinary API key>
+   CLOUDINARY_API_SECRET=<your Cloudinary API secret>
    ```
+   
+   **⚠️ CRITICAL:** The Cloudinary credentials are required to prevent image loss. See `CLOUDINARY_SETUP_GUIDE.md` for setup instructions.
 4. Deploy. Check `https://<your-backend>.onrender.com/api/health` returns `{"status":"ok",...}`.
 
-### ⚠️ Important: uploaded images won't survive redeploys on most free hosting
-The gallery/news/blog image upload feature (`/api/upload`) writes files to a local `backend/uploads` folder. Render, Railway, and similar platforms use **ephemeral disks** on their free/standard tiers — meaning uploaded files are wiped on every redeploy or restart. This is fine for local development and testing, but for a real production site you have two options:
+### ⚠️ Important: Persistent Image Storage Required
 
-- **Simplest fix:** Render's paid plans support a "Persistent Disk" you can mount at `/opt/render/project/src/backend/uploads` — cheap and requires zero code changes.
-- **More robust fix:** switch image storage to a cloud provider like Cloudinary or AWS S3 (free tiers available). This would mean swapping `multer.diskStorage` for a cloud-upload equivalent in `backend/middleware/uploadMiddleware.js` — a reasonable follow-up task if you want it, just let me know.
+**SOLUTION IMPLEMENTED:** The application now uses **Cloudinary** for permanent image storage.
 
-Until one of those is in place, treat uploaded images as temporary in production.
+#### Before (Problem):
+The gallery/news/blog image upload feature wrote files to a local `backend/uploads` folder. Render, Railway, and similar platforms use **ephemeral disks** on their free/standard tiers — meaning uploaded files were wiped on every redeploy or restart.
+
+#### After (Solution):
+All image uploads now go directly to **Cloudinary** (cloud storage with free tier), ensuring images survive all deploys, restarts, and spin-downs.
+
+#### Setup Required:
+1. Create a free Cloudinary account at https://cloudinary.com/users/register_free
+2. Get your credentials (Cloud Name, API Key, API Secret)
+3. Add them to Render environment variables (see Step 2)
+4. See `CLOUDINARY_SETUP_GUIDE.md` for complete setup instructions
+
+#### Testing:
+- Upload a test image through admin panel
+- Trigger a redeploy
+- Verify image still displays after redeploy ✅
+
+**Note:** Existing images with `/uploads/...` paths need to be re-uploaded. A migration script is available in `backend/scripts/migrate-images-to-cloudinary.js`.
 
 ## 3. Frontend hosting
 
@@ -91,10 +113,83 @@ After deploying, you **must** update your Google Cloud Console OAuth settings:
 - [ ] `GET /api/health` on the live backend returns `ok`
 - [ ] Frontend loads at its live URL, in both English and Afaan Oromo
 - [ ] **Test Google Sign-In** - Click "Sign in with Google", select an account, verify it works
+- [ ] **Test Image Upload** - Upload a gallery photo, verify it displays, trigger a redeploy, verify it still displays
 - [ ] Register a test account with email/password
 - [ ] In MongoDB Atlas manually set that test member's `role` to `"admin"` and `membershipStatus` to `"active"`
 - [ ] Log in as that admin, confirm the **Admin Panel** link appears and each section (Members, News & Events, Gallery, Articles, Support Requests) loads
 - [ ] Publish a test news post and a test event, confirm they render correctly in both languages
-- [ ] Upload a gallery photo, confirm it displays (remember the ephemeral-storage caveat above)
+- [ ] **Upload a gallery photo through admin panel** - Verify URL is `https://res.cloudinary.com/...` (not `/uploads/...`)
+- [ ] **Test image persistence** - Wait a few minutes, refresh gallery, verify images still display
 - [ ] Submit a test support request as a regular member, then respond to it from the admin panel
 - [ ] Test on a phone-sized screen — the header collapses to a hamburger menu under ~900px width
+
+
+---
+
+## 4. Progressive Web App (PWA) Features
+
+The site is now an installable Progressive Web App! Users can install it on their phones and desktops.
+
+### What's Included
+
+✅ **Installable**: Users can add the app to their home screen  
+✅ **Offline Support**: Previously viewed content works offline  
+✅ **Fast Loading**: Cached assets load instantly  
+✅ **App-like Experience**: Fullscreen, no browser UI
+
+### Deployment Checklist
+
+The PWA features are automatically included in the production build:
+
+- [x] Web app manifest (`manifest.json`)
+- [x] Service worker (auto-generated)
+- [x] App icons (192×192, 512×512, Apple touch icon)
+- [x] Install prompts (Android/iOS/Desktop)
+- [x] Offline fallback page
+- [x] PWA meta tags
+
+### Verifying PWA in Production
+
+After deploying to Vercel:
+
+1. **Visit your site on mobile** (https://5gstudentunion.vercel.app)
+2. **Check for install prompt** (Android shows banner, iOS requires manual install)
+3. **Test installation**:
+   - Android: Tap install banner
+   - iOS: Share → Add to Home Screen
+   - Desktop: Click install icon in address bar
+4. **Verify in Chrome DevTools**:
+   - Open DevTools → Application tab
+   - Check Manifest section (should show no errors)
+   - Check Service Workers (should be "activated and running")
+
+### User Installation Guide
+
+Share the `PWA_USER_GUIDE.md` file with your users for installation instructions.
+
+### Browser Support
+
+| Platform | Install Support | Offline Support |
+|----------|----------------|-----------------|
+| Android (Chrome) | ✅ Full | ✅ Full |
+| iOS (Safari) | ⚠️ Manual only | ✅ Full |
+| Desktop (Chrome/Edge) | ✅ Full | ✅ Full |
+
+### Troubleshooting
+
+**Install prompt not showing:**
+- Verify site is served over HTTPS (Vercel provides this)
+- Check browser console for manifest errors
+- Some browsers require multiple visits before showing prompt
+
+**Service worker not registering:**
+- Check that all PWA files are in the deployed `dist/` folder
+- Verify no console errors on the site
+- Clear browser cache and try again
+
+**Images not loading offline:**
+- First visit requires internet to cache images
+- Only previously viewed images work offline
+- Cloudinary images are cached for 7 days
+
+For complete PWA documentation, see the generated artifact or contact the development team.
