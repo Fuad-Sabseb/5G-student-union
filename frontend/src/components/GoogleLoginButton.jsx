@@ -44,7 +44,7 @@ export default function GoogleLoginButton({
         onError={handleError}
         useOneTap={false}
         auto_select={false}
-        context="signin"
+        context="signup"
         ux_mode="popup"
         text={buttonText || t('auth.continue_google')}
         width="100%"

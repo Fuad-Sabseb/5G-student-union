@@ -637,13 +637,18 @@ export default function Register() {
                     </button>
                   </div>
 
-                  <button type="submit" className="btn btn--gold btn--full" disabled={submitting}>
+                  <button type="submit" className="btn btn--gold btn--full" disabled={submitting || !agreedToTerms}>
                     {submitting
                       ? t('common.loading')
                       : form.preferredLanguage === 'or'
-                      ? 'Koodii Mirkaneessaa Ergi →'
-                      : 'Send Verification Code →'}
+                      ? '📧 Galmaa\'i'
+                      : '📧 Sign Up'}
                   </button>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-ink-soft)', marginTop: '0.5rem', textAlign: 'center' }}>
+                    {form.preferredLanguage === 'or'
+                      ? 'Koodiin mirkaneessaa gara imeelii keetii ni ergama'
+                      : 'We\'ll send a verification code to your email'}
+                  </p>
                 </form>
 
               {/* Divider */}
