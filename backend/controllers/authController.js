@@ -472,38 +472,11 @@ const googleAuth = asyncHandler(async (req, res) => {
       token: generateToken(member._id, member.role),
     });
   } else {
-    // New member registration via Google
-    const derivedName = fullName && fullName.trim() !== '' ? fullName : formatNameFromEmail(normalizedEmail);
-
-    member = await Member.create({
-      fullName: derivedName,
-      email: normalizedEmail,
-      googleSub,
-      googleId: `google_${googleSub}`, // Legacy field for backward compatibility
-      profileImageUrl: profileImageUrl || '',
-      preferredLanguage: preferredLanguage || 'or',
-      isAlumni: Boolean(isAlumni),
-      graduationYear: graduationYear ? Number(graduationYear) : undefined,
-      currentOccupation: currentOccupation || '',
-      currentCompany: currentCompany || '',
-      currentLocation: currentLocation || '',
-      linkedinUrl: linkedinUrl || '',
-      alumniBio: alumniBio || '',
-      willingToMentor: Boolean(willingToMentor),
-      isVerified: true, // Google-verified email
-    });
-
-    res.status(201).json({
-      _id: member._id,
-      fullName: member.fullName,
-      email: member.email,
-      role: member.role,
-      membershipStatus: member.membershipStatus,
-      preferredLanguage: member.preferredLanguage,
-      profileImageUrl: member.profileImageUrl,
-      isAlumni: member.isAlumni,
-      token: generateToken(member._id, member.role),
-    });
+    // Account does not exist - user must register first
+    res.status(403);
+    throw new Error(
+      'No account found with this Google email. Please register first using the Sign Up page before signing in with Google.'
+    );
   }
 });
 
