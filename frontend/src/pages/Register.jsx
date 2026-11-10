@@ -113,10 +113,7 @@ export default function Register() {
         language: form.preferredLanguage,
       });
 
-      if (res.data.devCode) {
-        setDevCode(res.data.devCode);
-        setVerificationCode(res.data.devCode); // Pre-fill in dev mode for convenient 1-click test
-      }
+      // OTP is sent to email only - never displayed in browser
 
       setStep('verify');
       setResendCountdown(60);
@@ -137,10 +134,7 @@ export default function Register() {
         email: form.email.trim().toLowerCase(),
         language: form.preferredLanguage,
       });
-      if (res.data.devCode) {
-        setDevCode(res.data.devCode);
-        setVerificationCode(res.data.devCode);
-      }
+      // OTP is sent to email only - never displayed in browser
       setResendCountdown(60);
     } catch (err) {
       setError(err.response?.data?.message || 'Could not resend code. Please try again.');
@@ -310,14 +304,6 @@ export default function Register() {
                 </span>
               </p>
 
-              {devCode && (
-                <div className="dev-code-banner">
-                  <IconBulbTech size={16} color="#10b981" />
-                  <span>Test OTP Code:</span>
-                  <span className="dev-code-badge">{devCode}</span>
-                </div>
-              )}
-
               <form onSubmit={handleVerifyAndRegister}>
                 <input
                   ref={otpInputRef}
@@ -330,7 +316,7 @@ export default function Register() {
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   className="verification-code-input"
-                  autoComplete="one-time-code"
+                  autoComplete="off"
                 />
 
                 {error && <p className="form-error" style={{ marginBottom: '1rem' }}>{error}</p>}
